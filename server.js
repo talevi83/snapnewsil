@@ -37,29 +37,30 @@ app.get('/api/news', async (req, res) => {
 
   try {
     const params = {
-      q,
-      language:  lang,
-      sortBy:    'publishedAt',
-      pageSize:  12,
-      page:      parseInt(page, 10),
-      apiKey:    process.env.NEWS_API_KEY,
+      language: lang,
+      sortBy:   'publishedAt',
+      pageSize: 12,
+      page:     parseInt(page, 10),
+      apiKey:   process.env.NEWS_API_KEY,
     };
 
     if (international === 'true') {
+      // qInTitle guarantees "Israel" is in the headline — no post-filter needed
+      params.qInTitle       = q;
       params.excludeDomains = ISRAELI_DOMAINS;
+    } else {
+      // Hebrew tabs: search full content, then filter to title/description mentions
+      params.q = q;
     }
 
     const response = await axios.get('https://newsapi.org/v2/everything', { params });
 
-    // Keep only articles where Israel is prominent (in title or description),
-    // not just a passing mention buried in the body.
-    const israelTerms = lang === 'he'
-      ? /ישראל|ישראלי|ישראלים/
-      : /israel(i|is|'s)?/i;
+    const israelTerms = /ישראל|ישראלי|ישראלים/;
 
     const articles = response.data.articles
       .filter(a => a.title && a.title !== '[Removed]' && a.description)
-      .filter(a => israelTerms.test(`${a.title} ${a.description}`))
+      // For Hebrew tabs only: ensure Israel is mentioned in title or description
+      .filter(a => international === 'true' || israelTerms.test(`${a.title} ${a.description}`))
       .map((a, i) => ({
         id:          `p${page}-${i}`,
         title:       a.title,

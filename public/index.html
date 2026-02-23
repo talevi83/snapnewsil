@@ -249,6 +249,17 @@
 
     .settings-hint { font-size:.76rem; color:var(--muted); margin-top:.5rem; line-height:1.5; }
 
+    .clear-cache-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      width: 100%; padding: 9px 14px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--muted);
+      font-size: .83rem; font-weight: 500; cursor: pointer;
+      transition: all var(--ease); font-family: inherit; justify-content: center;
+    }
+    .clear-cache-btn:hover { border-color: var(--red); color: var(--red); background: rgba(240,75,98,.07); }
+    .clear-cache-btn.done  { border-color: #10b981; color: #10b981; }
+
     /* ══════════════ TOAST ══════════════ */
     .toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
@@ -405,6 +416,16 @@
       <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded articles.</p>
     </div>
 
+    <!-- Clear Cache -->
+    <div class="settings-section">
+      <label data-i18n="cacheLabel">Local Cache</label>
+      <button class="clear-cache-btn" id="clearCacheBtn" onclick="clearCache()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        <span data-i18n="clearCache">Clear Cache</span>
+      </button>
+      <p class="settings-hint" id="cacheHint"></p>
+    </div>
+
   </div>
 </div>
 
@@ -437,6 +458,27 @@
   function setCachedTranslation(url, lang, data) { lsCache.translations[`${url}::${lang}`] = data; saveCache(lsCache); }
 
   let lsCache = loadCache();
+
+  function clearCache() {
+    lsCache = initCache();
+    const btn = document.getElementById('clearCacheBtn');
+    btn.classList.add('done');
+    btn.querySelector('span').textContent = t('cacheCleared');
+    setTimeout(() => {
+      btn.classList.remove('done');
+      btn.querySelector('span').textContent = t('clearCache');
+      updateCacheHint();
+    }, 2000);
+  }
+
+  function updateCacheHint() {
+    const hint = document.getElementById('cacheHint');
+    if (!hint) return;
+    const s = Object.keys(lsCache.summaries).length;
+    const tr = Object.keys(lsCache.translations).length;
+    const fn = I18N[settings.uiLang]?.cacheSize || I18N.en.cacheSize;
+    hint.textContent = fn(s, tr);
+  }
 
   // ══════════════ I18N ══════════════
   const I18N = {
@@ -475,6 +517,10 @@
       couldNotLoad:     'Could not load news',
       footerLine1:      null, // HTML – skip
       footerLine2:      'Updated in real time · Summaries and translations are AI-generated',
+      cacheLabel:       'Local Cache',
+      clearCache:       'Clear Cache',
+      cacheCleared:     'Cache cleared',
+      cacheSize:        (s, t) => `${s} summaries · ${t} translations stored`,
     },
     he: {
       liveUpdates:      'עדכונים חיים',
@@ -511,6 +557,10 @@
       couldNotLoad:     'לא ניתן לטעון חדשות',
       footerLine1:      null,
       footerLine2:      'מתעדכן בזמן אמת · סיכומים ותרגומים נוצרים ע"י AI',
+      cacheLabel:       'מטמון מקומי',
+      clearCache:       'נקה מטמון',
+      cacheCleared:     'המטמון נוקה',
+      cacheSize:        (s, t) => `${s} סיכומים · ${t} תרגומים שמורים`,
     },
   };
 
@@ -571,6 +621,7 @@
   function openSettings() {
     document.getElementById('settingsPanel') .classList.add('open');
     document.getElementById('settingsOverlay').classList.add('open');
+    updateCacheHint();
   }
   function closeSettings() {
     document.getElementById('settingsPanel') .classList.remove('open');
