@@ -153,16 +153,17 @@ app.post('/api/summarize', async (req, res) => {
     });
   }
 
-  const { id, title, description, content, lang = 'he' } = req.body;
+  const { id, title, description, content, lang = 'he', sentences = 3 } = req.body;
   if (!title) return res.status(400).json({ error: 'title is required' });
 
   const context = [title, description, content?.replace(/\[\+\d+ chars\]$/, '')]
     .filter(Boolean)
     .join('\n\n');
 
+  const n = Math.min(10, Math.max(2, parseInt(sentences, 10) || 3));
   const systemPrompt = lang === 'he'
-    ? 'אתה מסכם חדשות תמציתי. השב אך ורק ב-2-3 משפטים עובדתיים וניטרליים בעברית.'
-    : 'You are a concise news summarizer. Respond with 2-3 neutral, factual sentences in English.';
+    ? `אתה מסכם חדשות. השב ב-${n} משפטים עובדתיים וניטרליים בעברית. אם אין מספיק תוכן, כתוב פחות לפי הצורך.`
+    : `You are a news summarizer. Respond with ${n} neutral, factual sentences in English. If there is not enough content, use fewer sentences as needed.`;
   const userPrompt = lang === 'he'
     ? `סכם את כתבת החדשות הבאה בעברית:\n\n${context}`
     : `Summarize this news article:\n\n${context}`;
@@ -170,7 +171,7 @@ app.post('/api/summarize', async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model:      'gpt-4o',
-      max_tokens: 200,
+      max_tokens: Math.max(200, n * 55),
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userPrompt   },

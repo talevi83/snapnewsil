@@ -271,6 +271,12 @@
     .synth-btn:hover:not(:disabled) { background:rgba(245,165,36,.1); border-color:var(--gold); }
     .synth-btn:disabled { opacity:.5; cursor:default; }
 
+    /* ── Summary-length slider ────────────────────────────────────────────────── */
+    .slider-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+    .slider-row span { font-size:.75rem; color:var(--muted); }
+    .slider-row .slider-val { font-size:.85rem; font-weight:700; color:var(--text); min-width:1.8ch; text-align:center; }
+    .slider-row input[type=range] { flex:1; height:4px; border-radius:2px; cursor:pointer; accent-color:var(--blue); background:var(--border); }
+
     /* ══════════════ ISRAELI MEDIA TAB ══════════════ */
     .cat-btn--local { border-color:rgba(16,185,129,.3); color:#10b981; }
     .cat-btn--local:hover  { background:rgba(16,185,129,.1); border-color:#10b981; color:#10b981; }
@@ -463,6 +469,19 @@
       <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded articles.</p>
     </div>
 
+    <!-- Summary Length -->
+    <div class="settings-section">
+      <label data-i18n="summaryLength">Summary Length</label>
+      <div class="slider-row">
+        <span>2</span>
+        <input type="range" id="summarySlider" min="2" max="10" step="1"
+               oninput="setSummaryLength(+this.value)">
+        <span class="slider-val" id="summaryVal">3</span>
+        <span data-i18n="sentences">sentences</span>
+      </div>
+      <p class="settings-hint" data-i18n="summaryLengthHint"></p>
+    </div>
+
   </div>
 </div>
 
@@ -527,9 +546,12 @@
       fontRubik:        'Rubik',
       fontFrankRuhl:    'Frank Ruhl',
       fontAssistant:    'Assistant',
-      israeliMedia:     '🗞️ Israeli Media',
-      synthesizeTitle:  '✨ Synthesize title',
-      synthesizing:     'Synthesizing…',
+      israeliMedia:      '🗞️ Israeli Media',
+      synthesizeTitle:   '✨ Synthesize title',
+      synthesizing:      'Synthesizing…',
+      summaryLength:     'Summary Length',
+      sentences:         'sentences',
+      summaryLengthHint: 'Shorter = faster & cheaper. Longer = more detail.',
     },
     he: {
       liveUpdates:      'עדכונים חיים',
@@ -571,9 +593,12 @@
       fontRubik:        'רוביק',
       fontFrankRuhl:    'פרנק רוהל',
       fontAssistant:    'אסיסטנט',
-      israeliMedia:     '🗞️ ישראלי',
-      synthesizeTitle:  '✨ נסח מחדש',
-      synthesizing:     'מנסח…',
+      israeliMedia:      '🗞️ ישראלי',
+      synthesizeTitle:   '✨ נסח מחדש',
+      synthesizing:      'מנסח…',
+      summaryLength:     'אורך הסיכום',
+      sentences:         'משפטים',
+      summaryLengthHint: 'פחות = מהיר יותר. יותר = פרטים נוספים.',
     },
   };
 
@@ -583,10 +608,11 @@
 
   // ══════════════ SETTINGS STATE ══════════════
   const settings = {
-    theme:       localStorage.getItem('news-theme')        || 'dark',
-    uiLang:      localStorage.getItem('news-ui-lang')      || 'en',
-    translateTo: localStorage.getItem('news-translate-to') || '',
-    font:        localStorage.getItem('news-font')         || 'heebo',
+    theme:         localStorage.getItem('news-theme')           || 'dark',
+    uiLang:        localStorage.getItem('news-ui-lang')         || 'en',
+    translateTo:   localStorage.getItem('news-translate-to')    || '',
+    font:          localStorage.getItem('news-font')            || 'heebo',
+    summaryLength: parseInt(localStorage.getItem('news-summary-length') || '3', 10),
   };
 
   const FONT_FAMILIES = {
@@ -623,6 +649,16 @@
     updateUiText();
   }
 
+  function setSummaryLength(n) {
+    n = Math.min(10, Math.max(2, n));
+    settings.summaryLength = n;
+    localStorage.setItem('news-summary-length', n);
+    const val    = document.getElementById('summaryVal');
+    const slider = document.getElementById('summarySlider');
+    if (val)    val.textContent = n;
+    if (slider) slider.value   = n;
+  }
+
   function setTranslateTo(lang) {
     settings.translateTo = lang;
     localStorage.setItem('news-translate-to', lang);
@@ -638,6 +674,7 @@
     setUiLang(settings.uiLang);
     setFont(settings.font);
     document.getElementById('translateSelect').value = settings.translateTo;
+    setSummaryLength(settings.summaryLength);
   }
 
   function updateUiText() {
@@ -911,7 +948,7 @@
     try {
       const res = await fetch('/api/summarize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, lang: settings.translateTo || lang }),
+        body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, lang: settings.translateTo || lang, sentences: settings.summaryLength }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error||'Request failed'); }
       const data = await res.json();
