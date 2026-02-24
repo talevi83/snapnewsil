@@ -1,5 +1,5 @@
 {
-  "name": "israel-news",
+  "name": "snapnewsil",
   "version": "1.0.0",
   "description": "Latest Israel News with AI Summaries",
   "main": "server.js",
@@ -13,7 +13,8 @@
     "dotenv": "^16.4.0",
     "express": "^4.19.0",
     "openai": "^6.23.0",
-    "rss-parser": "^3.13.0"
+    "rss-parser": "^3.13.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

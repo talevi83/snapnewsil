@@ -1,13 +1,14 @@
 require('dotenv').config();
 const express = require('express');
-const axios   = require('axios');
+const axios = require('axios');
 const cheerio = require('cheerio');
-const OpenAI  = require('openai');
-const Parser  = require('rss-parser');
-const path    = require('path');
-const fs      = require('fs');
+const OpenAI = require('openai');
+const Parser = require('rss-parser');
+const path = require('path');
+const fs = require('fs');
+const sharp = require('sharp');
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // OpenAI client is optional — only used for AI summaries
@@ -29,67 +30,61 @@ const rssParser = new Parser({
 
 const CATEGORY_FEEDS = {
   all: [
-    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',       name: 'Ynet'       },
-    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
-    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
-    { url: 'https://www.maariv.co.il/rss/rsschadashot',               name: 'מעריב'      },
-    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml', name: 'Ynet' },
+    { url: 'https://rss.walla.co.il/feed/1', name: 'Walla' },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml', name: 'N12' },
+    { url: 'https://www.maariv.co.il/rss/rsschadashot', name: 'מעריב' },
+    { url: 'https://www.israelhayom.co.il/rss.xml', name: 'ישראל היום' },
   ],
   politics: [
-    { url: 'https://www.maariv.co.il/rss/rssfeedspolitimedini',       name: 'מעריב'      },
-    { url: 'https://rss.walla.co.il/feed/9',                          name: 'Walla'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
-    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
-    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+    { url: 'https://www.maariv.co.il/rss/rssfeedspolitimedini', name: 'מעריב' },
+    { url: 'https://rss.walla.co.il/feed/9', name: 'Walla' },
   ],
   security: [
-    { url: 'https://www.maariv.co.il/rss/rssfeedszavavebetachon',     name: 'מעריב'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
-    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
-    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+    { url: 'https://www.maariv.co.il/rss/rssfeedszavavebetachon', name: 'מעריב' },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml', name: 'N12' },
+    { url: 'https://rss.walla.co.il/feed/2642', name: 'Walla' },
   ],
   economy: [
-    { url: 'https://www.calcalist.co.il/GeneralRSS.aspx',             name: 'כלכליסט'    },
-    { url: 'https://www.globes.co.il/CommonFiles/Rss/RssGlobes.aspx', name: 'גלובס'      },
-    { url: 'https://www.themarker.com/srv/tm-news',                   name: 'TheMarker'  },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss6.xml',        name: 'Ynet'       },
-    { url: 'https://rss.walla.co.il/feed/3',                          name: 'Walla'      },
-    { url: 'https://www.maariv.co.il/rss/rssfeedsasakim',             name: 'מעריב'      },
+    { url: 'https://www.calcalist.co.il/GeneralRSS.aspx', name: 'כלכליסט' },
+    { url: 'https://www.globes.co.il/CommonFiles/Rss/RssGlobes.aspx', name: 'גלובס' },
+    { url: 'https://www.themarker.com/srv/tm-news', name: 'TheMarker' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss6.xml', name: 'Ynet' },
+    { url: 'https://rss.walla.co.il/feed/3', name: 'Walla' },
+    { url: 'https://www.maariv.co.il/rss/rssfeedsasakim', name: 'מעריב' },
   ],
   diplomacy: [
-    { url: 'https://www.maariv.co.il/rss/rssfeedspolitimedini',       name: 'מעריב'      },
-    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
-    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss3171.xml', name: 'Ynet' },
+    { url: 'https://www.israelhayom.co.il/rss.xml', name: 'ישראל היום' },
+    { url: 'https://rss.walla.co.il/feed/22', name: 'Walla' },
   ],
   society: [
-    { url: 'https://www.maariv.co.il/rss/rsschadashot',               name: 'מעריב'      },
-    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
-    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
-    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+    { url: 'https://rss.walla.co.il/feed/11', name: 'Walla' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss17.xml', name: 'Ynet' },
+    { url: 'https://www.maariv.co.il/rss/rssfeedsvariety', name: 'מעריב' },
   ],
   technology: [
-    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya',       name: 'מעריב'      },
-    { url: 'https://rss.walla.co.il/feed/4',                          name: 'Walla'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml',      name: 'Ynet'       },
-    { url: 'https://www.themarker.com/srv/tm-technation',             name: 'TheMarker'  },
+    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya', name: 'מעריב' },
+    { url: 'https://rss.walla.co.il/feed/4', name: 'Walla' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml', name: 'Ynet' },
+    { url: 'https://www.themarker.com/srv/tm-technation', name: 'TheMarker' },
   ],
   ai: [
-    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya',       name: 'מעריב'      },
-    { url: 'https://rss.walla.co.il/feed/4',                          name: 'Walla'      },
-    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml',      name: 'Ynet'       },
-    { url: 'https://www.themarker.com/srv/tm-technation',             name: 'TheMarker'  },
+    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya', name: 'מעריב' },
+    { url: 'https://rss.walla.co.il/feed/4', name: 'Walla' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml', name: 'Ynet' },
+    { url: 'https://www.themarker.com/srv/tm-technation', name: 'TheMarker' },
   ],
   world: [
-    { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',             name: 'BBC'          },
-    { url: 'https://feeds.foxnews.com/foxnews/world',                 name: 'Fox News'     },
-    { url: 'http://rss.cnn.com/rss/edition_world.rss',                name: 'CNN'          },
-    { url: 'https://www.aljazeera.com/xml/rss/all.xml',               name: 'Al Jazeera'   },
-    { url: 'https://www.theguardian.com/world/rss',                   name: 'The Guardian' },
-    { url: 'https://feeds.skynews.com/feeds/rss/world.xml',           name: 'Sky News'     },
-    { url: 'https://feeds.apnews.com/rss/apf-topnews',               name: 'AP'           },
+    { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', name: 'BBC' },
+    { url: 'https://feeds.foxnews.com/foxnews/world', name: 'Fox News' },
+    { url: 'http://rss.cnn.com/rss/edition_world.rss', name: 'CNN' },
+    { url: 'https://www.aljazeera.com/xml/rss/all.xml', name: 'Al Jazeera' },
+    { url: 'https://www.theguardian.com/world/rss', name: 'The Guardian' },
+    { url: 'https://feeds.skynews.com/feeds/rss/world.xml', name: 'Sky News' },
+    { url: 'https://feeds.apnews.com/rss/apf-topnews', name: 'AP' },
   ],
+  world_israel: [] // Handled separately by NewsAPI endpoint
 };
 
 // Keywords for AI-tab filtering (title or description must contain at least one)
@@ -99,19 +94,27 @@ const AI_KEYWORDS = [
 ];
 
 function normalizeRssItem(item, feedName) {
-  const image =
-    item.enclosure?.url       ||
-    item.mediaContent?.$.url  ||
+  let image =
+    item.enclosure?.url ||
+    item.mediaContent?.$.url ||
     item.mediaThumbnail?.$.url ||
     null;
+
+  if (!image && item.content) {
+    const match = item.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (match && match[1]) {
+      image = match[1];
+    }
+  }
+
   return {
-    title:       (item.title || '').trim(),
+    title: (item.title || '').trim(),
     description: (item.contentSnippet || item.summary || '').substring(0, 300),
-    content:     item.content || '',
-    url:         item.link || item.url || '',
-    urlToImage:  image,
+    content: item.content || '',
+    url: item.link || item.url || '',
+    urlToImage: image,
     publishedAt: item.isoDate || item.pubDate || new Date().toISOString(),
-    source:      feedName,
+    source: feedName,
   };
 }
 
@@ -160,8 +163,9 @@ const ISRAELI_DOMAINS = [
 ].join(',');
 
 // ─── GET /api/news ────────────────────────────────────────────────────────────
+// Used for "World View Israel" - fetches international coverage mentioning Israel
 app.get('/api/news', async (req, res) => {
-  const { page = 1, q = 'ישראל', lang = 'he', international = 'false' } = req.query;
+  const { page = 1, q = 'Israel', lang = 'en' } = req.query;
 
   if (!process.env.NEWS_API_KEY) {
     return res.status(500).json({ error: 'NEWS_API_KEY is not set in .env' });
@@ -170,38 +174,31 @@ app.get('/api/news', async (req, res) => {
   try {
     const params = {
       language: lang,
-      sortBy:   'publishedAt',
+      sortBy: 'publishedAt',
       pageSize: 12,
-      page:     parseInt(page, 10),
-      apiKey:   process.env.NEWS_API_KEY,
+      page: parseInt(page, 10),
+      apiKey: process.env.NEWS_API_KEY,
+      qInTitle: q,
+      excludeDomains: ISRAELI_DOMAINS
     };
-
-    if (international === 'true') {
-      // qInTitle guarantees "Israel" is in the headline — no post-filter needed
-      params.qInTitle       = q;
-      params.excludeDomains = ISRAELI_DOMAINS;
-    } else {
-      // Hebrew tabs: search full content, then filter to title/description mentions
-      params.q = q;
-    }
 
     const response = await axios.get('https://newsapi.org/v2/everything', { params });
 
     const articles = response.data.articles
       .filter(a => a.title && a.title !== '[Removed]' && a.description)
       .map((a, i) => ({
-        id:          `p${page}-${i}`,
-        title:       a.title,
+        id: `news-p${page}-${i}`,
+        title: a.title,
         description: a.description,
-        content:     a.content,
-        url:         a.url,
-        urlToImage:  a.urlToImage,
+        content: a.content,
+        url: a.url,
+        urlToImage: a.urlToImage,
         publishedAt: a.publishedAt,
-        source:      a.source?.name || 'Unknown',
-        author:      a.author,
+        source: a.source?.name || 'Unknown',
+        author: a.author,
       }));
 
-    res.json({ articles, totalResults: response.data.totalResults });
+    res.json({ articles, totalResults: response.data.totalResults, pageSize: 12 });
   } catch (err) {
     const msg = err.response?.data?.message || err.message;
     console.error('NewsAPI error:', msg);
@@ -216,8 +213,8 @@ async function scrapeArticle(url) {
     const response = await axios.get(url, {
       timeout: 8000,
       headers: {
-        'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept':          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
       },
       maxRedirects: 5,
@@ -228,7 +225,9 @@ async function scrapeArticle(url) {
     $('script, style, noscript, nav, header, footer, aside, ' +
       '[class*="ad-"], [class*="ads-"], [id*="ad-"], [id*="ads-"], ' +
       '[class*="social"], [class*="share"], [class*="comment"], ' +
-      '[class*="related"], [class*="sidebar"], [class*="newsletter"], [class*="subscribe"]'
+      '[class*="related"], [class*="sidebar"], [class*="newsletter"], [class*="subscribe"], ' +
+      '[class*="taboola"], [id*="taboola"], [class*="outbrain"], [class*="ob-"], ' +
+      '[class*="marketing"], [class*="promoted"], [class*="recommended"]'
     ).remove();
 
     // Selectors tried in priority order; pick first yielding >= 2 paragraphs > 40 chars
@@ -236,8 +235,8 @@ async function scrapeArticle(url) {
       'article p',
       '[class*="article-body"] p', '[class*="article-content"] p',
       '[class*="article_body"] p', '[class*="article_content"] p',
-      '[class*="ArticleBody"] p',  '[class*="ArticleContent"] p',
-      '[class*="story-body"] p',   '[class*="story-content"] p',
+      '[class*="ArticleBody"] p', '[class*="ArticleContent"] p',
+      '[class*="story-body"] p', '[class*="story-content"] p',
       '[class*="post-content"] p', '[class*="entry-content"] p',
       'main p',
     ];
@@ -275,8 +274,8 @@ app.post('/api/summarize', async (req, res) => {
   const context = scrapedText && scrapedText.length > 100
     ? scrapedText
     : [title, description, content?.replace(/\[\+\d+ chars\]$/, '')]
-        .filter(Boolean)
-        .join('\n\n');
+      .filter(Boolean)
+      .join('\n\n');
 
   const n = Math.min(10, Math.max(2, parseInt(sentences, 10) || 3));
   const systemPrompt = lang === 'he'
@@ -288,11 +287,11 @@ app.post('/api/summarize', async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model:      'gpt-4o',
+      model: 'gpt-4o',
       max_tokens: Math.max(200, n * 55),
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user',   content: userPrompt   },
+        { role: 'user', content: userPrompt },
       ],
     });
 
@@ -323,18 +322,18 @@ app.post('/api/translate', async (req, res) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model:           'gpt-4o',
-      max_tokens:      4000,
+      model: 'gpt-4o',
+      max_tokens: 4000,
       response_format: { type: 'json_object' },
       messages: [
         {
-          role:    'system',
+          role: 'system',
           content: `You are a professional news translator. Translate article titles and descriptions to ${targetName}.
 Return JSON: {"translations":[{"id":"...","title":"...","description":"..."},...]}
 Keep the same order and IDs. Preserve proper nouns where culturally appropriate.`,
         },
         {
-          role:    'user',
+          role: 'user',
           content: JSON.stringify(
             articles.map(a => ({ id: a.id, title: a.title, description: a.description || '' }))
           ),
@@ -404,17 +403,101 @@ app.get('/api/img-proxy', async (req, res) => {
       timeout: 8000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept':     'image/webp,image/apng,image/*,*/*;q=0.8',
-        'Referer':    `${parsed.protocol}//${parsed.host}/`,   // appear to come from the image's own site
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Referer': `${parsed.protocol}//${parsed.host}/`,   // appear to come from the image's own site
       },
     });
     const ct = response.headers['content-type'] || 'image/jpeg';
     if (!ct.startsWith('image/')) return res.status(415).send('Not an image');
-    res.setHeader('Content-Type', ct);
+
+    const isGifOrSvg = ct === 'image/gif' || ct === 'image/svg+xml';
+    res.setHeader('Content-Type', isGifOrSvg ? ct : 'image/webp');
     res.setHeader('Cache-Control', 'public, max-age=86400');   // cache 24 h in browser
-    response.data.pipe(res);
+
+    response.data.on('error', streamErr => {
+      console.error('Image proxy stream error:', streamErr.message);
+      res.end();
+    });
+
+    if (!isGifOrSvg) {
+      // Mechanism to reduce oversized images while maintaining aspect ratio
+      const transformer = sharp()
+        .resize({
+          width: 800,
+          height: 800,
+          fit: sharp.fit.inside,
+          withoutEnlargement: true
+        })
+        .webp({ quality: 80 });
+
+      transformer.on('error', err => {
+        console.error('Sharp error:', err.message);
+        res.end();
+      });
+
+      response.data.pipe(transformer).pipe(res);
+    } else {
+      response.data.pipe(res);
+    }
   } catch (err) {
     res.status(502).send('Could not fetch image');
+  }
+});
+
+// ─── GET /api/scrape-image ────────────────────────────────────────────────────
+// Scrapes an article URL to find its og:image, then redirects to img-proxy
+app.get('/api/scrape-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('Missing url');
+  try {
+    const response = await axios.get(url, {
+      timeout: 8000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml'
+      },
+      maxRedirects: 3
+    });
+    const $ = cheerio.load(response.data);
+    let img = $('meta[property="og:image"]').attr('content') ||
+      $('meta[name="twitter:image"]').attr('content') ||
+      $('meta[property="twitter:image"]').attr('content') ||
+      $('meta[name="twitter:image:src"]').attr('content') ||
+      $('meta[itemprop="image"]').attr('content') ||
+      $('link[rel="image_src"]').attr('href');
+
+    // First fallback: find largest image in article
+    if (!img) {
+      let maxArea = 0;
+      $('img').each((i, el) => {
+        const src = $(el).attr('src');
+        if (!src) return;
+        // Basic heuristic: ignore small icons or trackers
+        if (src.includes('icon') || src.includes('avatar') || src.includes('logo')) return;
+        const w = parseInt($(el).attr('width') || '0', 10);
+        const h = parseInt($(el).attr('height') || '0', 10);
+        const area = w * h;
+        if (area > maxArea && area > 10000) { // e.g., > 100x100
+          maxArea = area;
+          img = src;
+        } else if (!img && src.match(/\.(jpe?g|png|webp)/i)) {
+          // If no large image found yet, pick the first valid-looking image
+          img = src;
+        }
+      });
+    }
+
+    if (img) {
+      // Resolve relative URLs using base URL
+      if (!img.startsWith('http')) {
+        const parsedUrl = new URL(url);
+        img = new URL(img, parsedUrl.origin).href;
+      }
+      return res.redirect(`/api/img-proxy?url=${encodeURIComponent(img)}`);
+    }
+    return res.status(404).send('No image meta tag found');
+  } catch (err) {
+    return res.status(502).send('Scrape failed');
   }
 });
 
@@ -434,9 +517,17 @@ app.get('/api/rss', async (req, res) => {
     );
     let articles = [];
     results.forEach(r => { if (r.status === 'fulfilled') articles.push(...r.value); });
+
+    // Ad and sponsored content filtering keywords
+    const AD_KEYWORDS = /\b(APR|credit card|home equity|cash|refinance|mortgage|loan|sponsored|promoted|intro|0%|invest|insurance)\b/i;
+
     articles = articles
-      .filter(a => a.title && a.url)
-      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+      .filter(a => a.title && a.url && !AD_KEYWORDS.test(a.title))
+      .sort((a, b) => {
+        const timeA = new Date(a.publishedAt).getTime();
+        const timeB = new Date(b.publishedAt).getTime();
+        return (isNaN(timeB) ? 0 : timeB) - (isNaN(timeA) ? 0 : timeA);
+      });
 
     // AI tab: filter by keywords; fall back to all tech articles if too few results
     if (category === 'ai') {
@@ -447,9 +538,9 @@ app.get('/api/rss', async (req, res) => {
       if (filtered.length >= 6) articles = filtered;
     }
 
-    const groups  = groupByStory(articles);
+    const groups = groupByStory(articles);
     const pageNum = Math.max(1, parseInt(page, 10));
-    const paged   = groups
+    const paged = groups
       .slice((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE)
       .map((g, i) => ({ ...g, id: `rss-${category}-p${pageNum}-${i}` }));
 

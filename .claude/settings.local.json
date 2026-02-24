@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth status:*)",
+      "Bash(npm install:*)",
+      "Bash(node --check:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(node:*)",
+      "Bash(content)",
+      "Bash(ArticleBody\"] p, story/post/entry, main p\\):*)",
+      "WebFetch(domain:z.ynet.co.il)",
+      "WebFetch(domain:www.bizportal.co.il)",
+      "WebFetch(domain:www.ice.co.il)",
+      "WebFetch(domain:www.funder.co.il)",
+      "WebFetch(domain:rss.walla.co.il)",
+      "WebFetch(domain:www.walla.co.il)",
+      "WebFetch(domain:www.haaretz.co.il)",
+      "WebFetch(domain:www.haaretz.com)",
+      "WebFetch(domain:www.inn.co.il)",
+      "WebFetch(domain:rss.feedspot.com)",
+      "WebFetch(domain:www.themarker.com)",
+      "WebFetch(domain:www.mako.co.il)",
+      "WebFetch(domain:www.sport5.co.il)",
+      "WebFetch(domain:www.net4u.co.il)",
+      "WebFetch(domain:www.kan.org.il)",
+      "WebFetch(domain:www.israelhayom.co.il)",
+      "WebFetch(domain:feeder.co)",
+      "WebFetch(domain:www.one.co.il)",
+      "WebFetch(domain:www.maariv.co.il)",
+      "WebFetch(domain:www.ynet.co.il)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl:*)",
+      "Bash(netstat:*)"
+    ]
+  }
+}

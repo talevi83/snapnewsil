@@ -1,55 +1,67 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SnapNews IL — Live Updates</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Inter:wght@300;400;500;600&family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Inter:wght@300;400;500;600&family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Assistant:wght@300;400;600;700&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     /* ── Dark theme (default) ─────────────────────────────────────────────── */
     :root {
-      --bg:         #0b0b14;
-      --surface:    #13131f;
-      --surface2:   #1b1b2c;
-      --border:     rgba(255,255,255,0.07);
-      --blue:       #4f86f7;
-      --blue-dim:   rgba(79,134,247,0.14);
-      --text:       #e6e6f2;
-      --muted:      #7878a0;
-      --dim:        #3a3a5c;
-      --red:        #f04b62;
-      --gold:       #f5a524;
-      --radius:     14px;
-      --ease:       0.25s ease;
-      --article-font: 'Heebo','Inter',system-ui,sans-serif;
-      --header-bg:  linear-gradient(160deg,#0d1628 0%,#0c0f22 60%,#0b0b18 100%);
-      --shadow:     0 8px 32px rgba(0,0,0,.38);
+      --bg: #0b0b14;
+      --surface: #13131f;
+      --surface2: #1b1b2c;
+      --border: rgba(255, 255, 255, 0.07);
+      --blue: #4f86f7;
+      --blue-dim: rgba(79, 134, 247, 0.14);
+      --text: #e6e6f2;
+      --muted: #7878a0;
+      --dim: #3a3a5c;
+      --red: #f04b62;
+      --gold: #f5a524;
+      --radius: 14px;
+      --ease: 0.25s ease;
+      --article-font: 'Heebo', 'Inter', system-ui, sans-serif;
+      --header-bg: linear-gradient(160deg, #0d1628 0%, #0c0f22 60%, #0b0b18 100%);
+      --shadow: 0 8px 32px rgba(0, 0, 0, .38);
     }
 
     /* ── Light theme ──────────────────────────────────────────────────────── */
     [data-theme="light"] {
-      --bg:         #f0f0f8;
-      --surface:    #ffffff;
-      --surface2:   #e8e8f2;
-      --border:     rgba(0,0,0,0.08);
-      --blue:       #2563eb;
-      --blue-dim:   rgba(37,99,235,0.08);
-      --text:       #111827;
-      --muted:      #6b7280;
-      --dim:        #9ca3af;
-      --red:        #dc2626;
-      --gold:       #d97706;
-      --header-bg:  linear-gradient(160deg,#1a2e50 0%,#152340 60%,#0f1c34 100%);
-      --shadow:     0 4px 20px rgba(0,0,0,.10);
+      --bg: #f0f0f8;
+      --surface: #ffffff;
+      --surface2: #e8e8f2;
+      --border: rgba(0, 0, 0, 0.08);
+      --blue: #2563eb;
+      --blue-dim: rgba(37, 99, 235, 0.08);
+      --text: #111827;
+      --muted: #6b7280;
+      --dim: #9ca3af;
+      --red: #dc2626;
+      --gold: #d97706;
+      --header-bg: linear-gradient(160deg, #1a2e50 0%, #152340 60%, #0f1c34 100%);
+      --shadow: 0 4px 20px rgba(0, 0, 0, .10);
     }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Heebo','Inter',system-ui,sans-serif;
+      font-family: 'Heebo', 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
@@ -62,801 +74,1878 @@
       background: var(--header-bg);
       border-bottom: 1px solid var(--border);
       padding: 0 2rem;
-      position: sticky; top: 0; z-index: 100;
+      position: sticky;
+      top: 0;
+      z-index: 100;
       backdrop-filter: blur(20px);
     }
+
     .header-inner {
-      max-width: 1300px; margin: 0 auto;
-      display: flex; align-items: center; justify-content: space-between; height: 70px;
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
     }
-    .logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-    .flag { width: 38px; height: 27px; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.5); display: flex; flex-direction: column; flex-shrink: 0; }
-    .flag-stripe { background: #003399; height: 6px; }
-    .flag-white  { background: #fff; flex: 1; display: flex; align-items: center; justify-content: center; }
-    .flag-star   { color: #003399; font-size: 13px; line-height: 1; }
-    .logo-text   { display: flex; flex-direction: column; }
-    .logo-title  { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:700; color:#fff; letter-spacing:-.02em; line-height:1.1; }
-    .logo-sub    { font-size:.66rem; color:rgba(255,255,255,.5); letter-spacing:.14em; text-transform:uppercase; }
 
-    .header-right { display:flex; align-items:center; gap:1rem; }
-    .live-pill { display:flex; align-items:center; gap:6px; background:rgba(240,75,98,.12); border:1px solid rgba(240,75,98,.3); color:var(--red); padding:4px 10px; border-radius:20px; font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
-    .live-dot  { width:7px; height:7px; background:var(--red); border-radius:50%; animation:blink 1.6s ease-in-out infinite; }
-    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
-    .header-date { color:rgba(255,255,255,.45); font-size:.8rem; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+    }
 
-    .settings-btn {
-      display: flex; align-items: center; justify-content: center;
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-      border-radius: 8px; color: rgba(255,255,255,.7);
-      cursor: pointer; transition: all var(--ease);
+    .flag {
+      width: 38px;
+      height: 27px;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+      display: flex;
+      flex-direction: column;
       flex-shrink: 0;
     }
-    .settings-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+    .flag-stripe {
+      background: #003399;
+      height: 6px;
+    }
+
+    .flag-white {
+      background: #fff;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flag-star {
+      color: #003399;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.02em;
+      line-height: 1.1;
+    }
+
+    .logo-sub {
+      font-size: .66rem;
+      color: rgba(255, 255, 255, .5);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(240, 75, 98, .12);
+      border: 1px solid rgba(240, 75, 98, .3);
+      color: var(--red);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: blink 1.6s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(.75)
+      }
+    }
+
+    .header-date {
+      color: rgba(255, 255, 255, .45);
+      font-size: .8rem;
+    }
+
+    .settings-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, .7);
+      cursor: pointer;
+      transition: all var(--ease);
+      flex-shrink: 0;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+    }
 
     /* ══════════════ CATEGORY BAR ══════════════ */
-    .cat-bar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; position:sticky; top:70px; z-index:99; }
-    .cat-inner { max-width:1300px; margin:0 auto; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; padding:11px 0; }
-    .cat-inner::-webkit-scrollbar { display:none; }
-    .cat-btn { flex-shrink:0; padding:6px 16px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:.81rem; font-weight:500; cursor:pointer; transition:all var(--ease); font-family:inherit; white-space:nowrap; }
-    .cat-btn:hover  { background:var(--surface2); color:var(--text); border-color:var(--dim); }
-    .cat-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
-    .cat-divider    { flex-shrink:0; width:1px; background:var(--border); margin:0 6px; align-self:stretch; }
-    .cat-btn--world { border-color:rgba(245,165,36,.3); color:var(--gold); }
-    .cat-btn--world:hover  { background:rgba(245,165,36,.1); border-color:var(--gold); color:var(--gold); }
-    .cat-btn--world.active { background:var(--gold); color:#000; border-color:var(--gold); }
+    .cat-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      position: sticky;
+      top: 70px;
+      z-index: 99;
+    }
+
+    .cat-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 11px 0;
+    }
+
+    .cat-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-btn {
+      flex-shrink: 0;
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .81rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--ease);
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .cat-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--dim);
+    }
+
+    .cat-btn.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .cat-divider {
+      flex-shrink: 0;
+      width: 1px;
+      background: var(--border);
+      margin: 0 6px;
+      align-self: stretch;
+    }
+
+    .cat-btn--world {
+      border-color: rgba(245, 165, 36, .3);
+      color: var(--gold);
+    }
+
+    .cat-btn--world:hover {
+      background: rgba(245, 165, 36, .1);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .cat-btn--world.active {
+      background: var(--gold);
+      color: #000;
+      border-color: var(--gold);
+    }
 
     /* ══════════════ MAIN ══════════════ */
-    main { max-width:1300px; margin:0 auto; padding:2.5rem 2rem 4rem; }
-    .section-label { display:flex; align-items:center; gap:14px; margin-bottom:1.75rem; }
-    .section-label h2 { font-family:'Playfair Display',serif; font-size:1.45rem; font-weight:700; white-space:nowrap; }
-    .section-label .divider { flex:1; height:1px; background:var(--border); }
+    main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 1.75rem;
+    }
+
+    .section-label h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .section-label .divider {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
 
     /* ══════════════ HERO CARD ══════════════ */
-    .hero-card { display:grid; grid-template-columns:1.45fr 1fr; border-radius:var(--radius); overflow:hidden; background:var(--surface); border:1px solid var(--border); margin-bottom:2.25rem; color:inherit; transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease); }
-    .hero-card:hover { border-color:rgba(79,134,247,.35); box-shadow:0 12px 48px rgba(0,0,0,.45),0 0 0 1px rgba(79,134,247,.1); transform:translateY(-2px); }
-    .hero-img-wrap { position:relative; overflow:hidden; min-height:360px; }
-    .hero-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .55s ease; display:block; }
-    .hero-card:hover .hero-img-wrap img { transform:scale(1.05); }
-    .hero-img-fallback { width:100%; height:100%; min-height:360px; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:3.5rem; font-weight:700; color:rgba(255,255,255,.12); }
-    .hero-overlay { position:absolute; inset:0; background:linear-gradient(to right,transparent 55%,var(--surface)); pointer-events:none; }
-    .hero-content { padding:2.25rem 2.5rem; display:flex; flex-direction:column; gap:1rem; justify-content:center; }
-    .breaking-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(240,75,98,.14); border:1px solid rgba(240,75,98,.4); color:var(--red); padding:3px 10px; border-radius:4px; font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; width:fit-content; }
-    .hero-source { color:var(--blue); font-size:.76rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
-    .hero-title  { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:700; line-height:1.28; color:var(--text); text-decoration:none; }
-    .hero-title:hover { color:var(--blue); }
-    .hero-desc   { color:var(--muted); font-size:.93rem; line-height:1.7; }
-    .hero-footer { display:flex; align-items:center; margin-top:auto; padding-top:1.1rem; border-top:1px solid var(--border); gap:1rem; }
-    .hero-time   { font-size:.78rem; color:var(--dim); }
-    .read-btn    { margin-left:auto; padding:8px 18px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:.81rem; font-weight:600; cursor:pointer; text-decoration:none; transition:background var(--ease),transform var(--ease); flex-shrink:0; }
-    .read-btn:hover { background:#3870e0; transform:translateY(-1px); }
+    .hero-card {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 2.25rem;
+      color: inherit;
+      transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+    }
+
+    .hero-card:hover {
+      border-color: rgba(79, 134, 247, .35);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, .45), 0 0 0 1px rgba(79, 134, 247, .1);
+      transform: translateY(-2px);
+    }
+
+    /* RTL Layout fix for the Hero Card */
+    html[dir="rtl"] .hero-card {
+      grid-template-columns: 1fr 1.45fr;
+    }
+
+    html[dir="rtl"] .hero-img-wrap {
+      order: 2;
+    }
+
+    html[dir="rtl"] .hero-content {
+      order: 1;
+      text-align: right;
+    }
+
+    .hero-img-wrap {
+      position: relative;
+      overflow: hidden;
+      min-height: 360px;
+    }
+
+    .hero-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .55s ease;
+      display: block;
+    }
+
+    .hero-card:hover .hero-img-wrap img {
+      transform: scale(1.05);
+    }
+
+    .hero-img-fallback {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, .12);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, transparent 55%, var(--surface));
+      pointer-events: none;
+    }
+
+    html[dir="rtl"] .hero-overlay {
+      background: linear-gradient(to left, transparent 55%, var(--surface));
+    }
+
+    .hero-content {
+      padding: 2.25rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .breaking-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(240, 75, 98, .14);
+      border: 1px solid rgba(240, 75, 98, .4);
+      color: var(--red);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .hero-source {
+      color: var(--blue);
+      font-size: .76rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1.28;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .hero-title:hover {
+      color: var(--blue);
+    }
+
+    .hero-desc {
+      color: var(--muted);
+      font-size: .93rem;
+      line-height: 1.7;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hero-footer {
+      display: flex;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--border);
+      gap: 1rem;
+    }
+
+    .hero-time {
+      font-size: .78rem;
+      color: var(--dim);
+    }
+
+    .read-btn {
+      margin-left: auto;
+      padding: 8px 18px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .81rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background var(--ease), transform var(--ease);
+      flex-shrink: 0;
+    }
+
+    html[dir="rtl"] .read-btn {
+      margin-left: 0;
+      margin-right: auto;
+    }
+
+    .read-btn:hover {
+      background: #3870e0;
+      transform: translateY(-1px);
+    }
 
     /* ══════════════ NEWS GRID ══════════════ */
-    .news-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
 
     /* ══════════════ NEWS CARD ══════════════ */
-    .news-card, .hero-article { font-family: var(--article-font); }
-    .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease); }
-    .news-card:hover { border-color:rgba(79,134,247,.25); box-shadow:var(--shadow),0 0 0 1px rgba(79,134,247,.07); transform:translateY(-3px); }
-    .card-img-wrap { position:relative; aspect-ratio:16/9; overflow:hidden; }
-    .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; display:block; }
-    .news-card:hover .card-img-wrap img { transform:scale(1.07); }
-    .card-img-fallback { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:rgba(255,255,255,.13); }
-    [data-theme="light"] .card-img-fallback { color:rgba(0,0,0,.15); }
-    .src-badge   { position:absolute; bottom:9px; left:9px; background:rgba(0,0,0,.72); backdrop-filter:blur(8px); color:#fff; font-size:.67rem; font-weight:600; padding:3px 8px; border-radius:4px; letter-spacing:.04em; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .card-body   { padding:1.15rem; flex:1; display:flex; flex-direction:column; gap:.65rem; }
-    .card-title  { font-family:'Playfair Display',serif; font-size:1.02rem; font-weight:700; line-height:1.35; color:var(--text); text-decoration:none; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-    .card-title:hover { color:var(--blue); }
-    .card-desc   { color:var(--muted); font-size:.84rem; line-height:1.62; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .news-card,
+    .hero-article {
+      font-family: var(--article-font);
+    }
+
+    .news-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+    }
+
+    .news-card:hover {
+      border-color: rgba(79, 134, 247, .25);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(79, 134, 247, .07);
+      transform: translateY(-3px);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+    }
+
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .5s ease;
+      display: block;
+    }
+
+    .news-card:hover .card-img-wrap img {
+      transform: scale(1.07);
+    }
+
+    .card-img-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, .13);
+    }
+
+    [data-theme="light"] .card-img-fallback {
+      color: rgba(0, 0, 0, .15);
+    }
+
+    .src-badge {
+      position: absolute;
+      bottom: 9px;
+      left: 9px;
+      background: rgba(0, 0, 0, .72);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: .67rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: .04em;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-body {
+      padding: 1.15rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.02rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text);
+      text-decoration: none;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-title:hover {
+      color: var(--blue);
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.62;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     /* Translated badge */
-    .trans-badge { display:inline-flex; align-items:center; gap:4px; font-size:.65rem; font-weight:600; color:var(--gold); background:rgba(245,165,36,.1); border:1px solid rgba(245,165,36,.25); padding:2px 8px; border-radius:4px; letter-spacing:.04em; width:fit-content; }
+    .trans-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .65rem;
+      font-weight: 600;
+      color: var(--gold);
+      background: rgba(245, 165, 36, .1);
+      border: 1px solid rgba(245, 165, 36, .25);
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: .04em;
+      width: fit-content;
+    }
 
     /* ── AI Summary ── */
-    .ai-section { margin-top:.35rem; }
-    .ai-btn { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:transparent; border:1px solid var(--dim); color:var(--muted); border-radius:6px; font-size:.74rem; font-weight:500; cursor:pointer; transition:all var(--ease); font-family:inherit; }
-    .ai-btn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
-    .ai-btn:disabled { opacity:.55; cursor:default; }
-    .ai-btn .spin { width:11px; height:11px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:rotate .65s linear infinite; }
-    @keyframes rotate { to { transform:rotate(360deg); } }
-    .ai-box       { margin-top:.75rem; padding:.9rem; background:linear-gradient(135deg,rgba(79,134,247,.08),rgba(79,134,247,.03)); border:1px solid rgba(79,134,247,.22); border-radius:8px; display:none; }
-    .ai-box.show  { display:block; animation:fadeUp .28s ease; }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-    .ai-label { display:flex; align-items:center; gap:5px; font-size:.66rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); margin-bottom:.5rem; }
-    .ai-text  { font-size:.83rem; line-height:1.63; color:var(--text); }
+    .ai-section {
+      margin-top: .35rem;
+    }
+
+    .ai-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: transparent;
+      border: 1px solid var(--dim);
+      color: var(--muted);
+      border-radius: 6px;
+      font-size: .74rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--ease);
+      font-family: inherit;
+    }
+
+    .ai-btn:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-dim);
+    }
+
+    .ai-btn:disabled {
+      opacity: .55;
+      cursor: default;
+    }
+
+    .ai-btn .spin {
+      width: 11px;
+      height: 11px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: rotate .65s linear infinite;
+    }
+
+    @keyframes rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ai-box {
+      margin-top: .75rem;
+      padding: .9rem;
+      background: linear-gradient(135deg, rgba(79, 134, 247, .08), rgba(79, 134, 247, .03));
+      border: 1px solid rgba(79, 134, 247, .22);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .ai-box.show {
+      display: block;
+      animation: fadeUp .28s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(5px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .ai-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: .5rem;
+    }
+
+    .ai-text {
+      font-size: .83rem;
+      line-height: 1.63;
+      color: var(--text);
+    }
 
     /* Card footer */
-    .card-foot { padding:.85rem 1.15rem; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
-    .card-time { font-size:.74rem; color:var(--dim); }
-    .card-link { font-size:.74rem; color:var(--blue); text-decoration:none; font-weight:500; }
-    .card-link:hover { text-decoration:underline; }
+    .card-foot {
+      padding: .85rem 1.15rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+
+    .card-time {
+      font-size: .74rem;
+      color: var(--dim);
+    }
+
+    .card-link {
+      font-size: .74rem;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
 
     /* ══════════════ SKELETON ══════════════ */
-    .skel-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
-    .skel-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-    .skel-img  { aspect-ratio:16/9; background:var(--surface2); }
-    .skel-body { padding:1.15rem; display:flex; flex-direction:column; gap:.65rem; }
-    .skel-line { background:linear-gradient(90deg,var(--surface2) 25%,rgba(255,255,255,.04) 50%,var(--surface2) 75%); background-size:200% 100%; border-radius:4px; animation:shimmer 1.6s infinite; }
-    @keyframes shimmer { to { background-position:-200% 0; } }
+    .skel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .skel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .skel-img {
+      aspect-ratio: 16/9;
+      background: var(--surface2);
+    }
+
+    .skel-body {
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+    }
+
+    .skel-line {
+      background: linear-gradient(90deg, var(--surface2) 25%, rgba(255, 255, 255, .04) 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      border-radius: 4px;
+      animation: shimmer 1.6s infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: -200% 0;
+      }
+    }
 
     /* ══════════════ LOAD MORE ══════════════ */
-    .load-more-wrap { text-align:center; margin-top:2.5rem; }
-    .load-more-btn  { padding:11px 32px; background:transparent; border:1px solid var(--dim); color:var(--muted); border-radius:8px; font-size:.88rem; font-weight:500; cursor:pointer; transition:all var(--ease); font-family:inherit; }
-    .load-more-btn:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
-    .load-more-btn:disabled { opacity:.45; cursor:default; }
+    .load-more-wrap {
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+
+    .load-more-btn {
+      padding: 11px 32px;
+      background: transparent;
+      border: 1px solid var(--dim);
+      color: var(--muted);
+      border-radius: 8px;
+      font-size: .88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--ease);
+      font-family: inherit;
+    }
+
+    .load-more-btn:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-dim);
+    }
+
+    .load-more-btn:disabled {
+      opacity: .45;
+      cursor: default;
+    }
 
     /* ══════════════ STATES ══════════════ */
-    .state-box { text-align:center; padding:4rem 2rem; color:var(--muted); }
-    .state-box h3 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--text); margin-bottom:.5rem; }
-    .state-box p  { font-size:.9rem; max-width:420px; margin:0 auto; }
-    .state-box code { background:var(--surface2); padding:2px 6px; border-radius:4px; font-size:.85em; color:var(--gold); }
+    .state-box {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .state-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--text);
+      margin-bottom: .5rem;
+    }
+
+    .state-box p {
+      font-size: .9rem;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .state-box code {
+      background: var(--surface2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: .85em;
+      color: var(--gold);
+    }
 
     /* ══════════════ SETTINGS OVERLAY ══════════════ */
     .settings-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
       z-index: 200;
-      opacity: 0; pointer-events: none;
+      opacity: 0;
+      pointer-events: none;
       transition: opacity .3s;
     }
-    .settings-overlay.open { opacity: 1; pointer-events: all; }
+
+    .settings-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
 
     /* ══════════════ SETTINGS PANEL ══════════════ */
     .settings-panel {
-      position: fixed; top: 0; right: 0;
-      width: 320px; height: 100dvh;
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 320px;
+      height: 100dvh;
       background: var(--surface);
       border-left: 1px solid var(--border);
       z-index: 201;
       transform: translateX(100%);
-      transition: transform .32s cubic-bezier(.4,0,.2,1);
-      display: flex; flex-direction: column;
+      transition: transform .32s cubic-bezier(.4, 0, .2, 1);
+      display: flex;
+      flex-direction: column;
       overflow-y: auto;
     }
-    .settings-panel.open { transform: translateX(0); }
+
+    .settings-panel.open {
+      transform: translateX(0);
+    }
 
     .settings-head {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 1.25rem 1.5rem;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .settings-head h3 { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; }
-    .settings-close { width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--muted); cursor:pointer; font-size:.9rem; transition:all var(--ease); font-family:inherit; }
-    .settings-close:hover { background:var(--surface2); color:var(--text); }
 
-    .settings-body   { padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:1.75rem; }
-    .settings-section > label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:.75rem; }
+    .settings-head h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
 
-    .opt-pills { display:flex; gap:6px; flex-wrap:wrap; }
-    .opt-pill  { flex:1; min-width:80px; padding:8px 12px; text-align:center; background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:.82rem; font-weight:500; cursor:pointer; transition:all var(--ease); font-family:inherit; }
-    .opt-pill:hover   { background:var(--surface2); color:var(--text); border-color:var(--dim); }
-    .opt-pill.active  { background:var(--blue); color:#fff; border-color:var(--blue); }
-    .opt-pill--light.active { background:#f0c040; color:#000; border-color:#f0c040; }
+    .settings-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .9rem;
+      transition: all var(--ease);
+      font-family: inherit;
+    }
+
+    .settings-close:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .settings-body {
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .settings-section>label {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .75rem;
+    }
+
+    .opt-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .opt-pill {
+      flex: 1;
+      min-width: 80px;
+      padding: 8px 12px;
+      text-align: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--ease);
+      font-family: inherit;
+    }
+
+    .opt-pill:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--dim);
+    }
+
+    .opt-pill.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .opt-pill--light.active {
+      background: #f0c040;
+      color: #000;
+      border-color: #f0c040;
+    }
 
     .settings-select {
-      width:100%; padding:9px 12px;
-      background:var(--surface2); border:1px solid var(--border);
-      border-radius:8px; color:var(--text);
-      font-size:.85rem; font-family:inherit;
-      cursor:pointer; outline:none;
-      transition:border-color var(--ease);
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      transition: border-color var(--ease);
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237878a0' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 32px;
     }
-    .settings-select:focus { border-color:var(--blue); }
 
-    .settings-hint { font-size:.76rem; color:var(--muted); margin-top:.5rem; line-height:1.5; }
+    .settings-select:focus {
+      border-color: var(--blue);
+    }
+
+    .settings-hint {
+      font-size: .76rem;
+      color: var(--muted);
+      margin-top: .5rem;
+      line-height: 1.5;
+    }
 
     /* ══════════════ SOURCE CLUSTER (multi-source cards) ══════════════ */
-    .source-cluster { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:.6rem; }
-    .source-pill {
-      display:inline-flex; align-items:center; white-space:nowrap;
-      font-size:.65rem; font-weight:600; padding:3px 9px; border-radius:10px;
-      background:var(--surface2); border:1px solid var(--border);
-      color:var(--blue); text-decoration:none; transition:all var(--ease);
+    .source-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: .6rem;
     }
-    .source-pill:hover { background:var(--blue-dim); border-color:var(--blue); }
+
+    .source-pill {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      font-size: .65rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--blue);
+      text-decoration: none;
+      transition: all var(--ease);
+    }
+
+    .source-pill:hover {
+      background: var(--blue-dim);
+      border-color: var(--blue);
+    }
 
     /* ══════════════ SYNTHESIZE-TITLE BUTTON ══════════════ */
     .synth-btn {
-      display:inline-flex; align-items:center; gap:5px; margin-bottom:.4rem;
-      padding:4px 11px; border-radius:6px; font-family:inherit;
-      background:transparent; border:1px solid rgba(245,165,36,.3); color:var(--gold);
-      font-size:.72rem; font-weight:500; cursor:pointer; transition:all var(--ease);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: .4rem;
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-family: inherit;
+      background: transparent;
+      border: 1px solid rgba(245, 165, 36, .3);
+      color: var(--gold);
+      font-size: .72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--ease);
     }
-    .synth-btn:hover:not(:disabled) { background:rgba(245,165,36,.1); border-color:var(--gold); }
-    .synth-btn:disabled { opacity:.5; cursor:default; }
+
+    .synth-btn:hover:not(:disabled) {
+      background: rgba(245, 165, 36, .1);
+      border-color: var(--gold);
+    }
+
+    .synth-btn:disabled {
+      opacity: .5;
+      cursor: default;
+    }
 
     /* ── Summary-length slider ────────────────────────────────────────────────── */
-    .slider-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
-    .slider-row span { font-size:.75rem; color:var(--muted); }
-    .slider-row .slider-val { font-size:.85rem; font-weight:700; color:var(--text); min-width:1.8ch; text-align:center; }
-    .slider-row input[type=range] { flex:1; height:4px; border-radius:2px; cursor:pointer; accent-color:var(--blue); background:var(--border); }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .slider-row span {
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .slider-row .slider-val {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 1.8ch;
+      text-align: center;
+    }
+
+    .slider-row input[type=range] {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      cursor: pointer;
+      accent-color: var(--blue);
+      background: var(--border);
+    }
 
     /* ══════════════ ISRAELI MEDIA TAB ══════════════ */
-    .cat-btn--local { border-color:rgba(16,185,129,.3); color:#10b981; }
-    .cat-btn--local:hover  { background:rgba(16,185,129,.1); border-color:#10b981; color:#10b981; }
-    .cat-btn--local.active { background:#10b981; color:#000; border-color:#10b981; }
+    .cat-btn--local {
+      border-color: rgba(16, 185, 129, .3);
+      color: #10b981;
+    }
+
+    .cat-btn--local:hover {
+      background: rgba(16, 185, 129, .1);
+      border-color: #10b981;
+      color: #10b981;
+    }
+
+    .cat-btn--local.active {
+      background: #10b981;
+      color: #000;
+      border-color: #10b981;
+    }
 
     /* ══════════════ API KEY MODAL ══════════════ */
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(5px); z-index:3000; display:flex; align-items:center; justify-content:center; padding:1rem; }
-    .modal-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem 2rem 1.75rem; max-width:440px; width:100%; box-shadow:var(--shadow); text-align:center; }
-    .modal-icon { font-size:2.25rem; margin-bottom:.85rem; }
-    .modal-title { font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:.6rem; }
-    .modal-desc { font-size:.85rem; color:var(--muted); line-height:1.65; margin-bottom:1.25rem; }
-    .modal-input { width:100%; padding:.65rem .85rem; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.88rem; font-family:monospace; margin-bottom:.4rem; outline:none; transition:border-color var(--ease); }
-    .modal-input:focus { border-color:var(--blue); }
-    .modal-error { font-size:.8rem; color:var(--red); min-height:1.1em; margin-bottom:.85rem; }
-    .modal-save-btn { width:100%; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:.7rem 1.25rem; font-size:.9rem; font-weight:600; cursor:pointer; transition:opacity var(--ease); margin-bottom:.5rem; }
-    .modal-save-btn:hover:not(:disabled) { opacity:.88; }
-    .modal-save-btn:disabled { opacity:.5; cursor:default; }
-    .modal-skip-btn { background:none; border:none; color:var(--muted); font-size:.82rem; cursor:pointer; text-decoration:underline; }
-    .modal-skip-btn:hover { color:var(--text); }
-    .modal-hint { font-size:.74rem; color:var(--dim); margin-top:1.1rem; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(5px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2rem 1.75rem;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: 2.25rem;
+      margin-bottom: .85rem;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .6rem;
+    }
+
+    .modal-desc {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: .65rem .85rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .88rem;
+      font-family: monospace;
+      margin-bottom: .4rem;
+      outline: none;
+      transition: border-color var(--ease);
+    }
+
+    .modal-input:focus {
+      border-color: var(--blue);
+    }
+
+    .modal-error {
+      font-size: .8rem;
+      color: var(--red);
+      min-height: 1.1em;
+      margin-bottom: .85rem;
+    }
+
+    .modal-save-btn {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: .7rem 1.25rem;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--ease);
+      margin-bottom: .5rem;
+    }
+
+    .modal-save-btn:hover:not(:disabled) {
+      opacity: .88;
+    }
+
+    .modal-save-btn:disabled {
+      opacity: .5;
+      cursor: default;
+    }
+
+    .modal-skip-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: .82rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .modal-skip-btn:hover {
+      color: var(--text);
+    }
+
+    .modal-hint {
+      font-size: .74rem;
+      color: var(--dim);
+      margin-top: 1.1rem;
+    }
 
     /* ══════════════ TOAST ══════════════ */
     .toast {
-      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-      padding: 10px 18px; border-radius: 8px;
-      font-size: .82rem; font-weight: 500;
-      z-index: 300; pointer-events: none;
-      opacity: 0; transition: opacity .3s;
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: .82rem;
+      font-weight: 500;
+      z-index: 300;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s;
       white-space: nowrap;
     }
-    .toast.error   { background:#1e1e30; border:1px solid rgba(240,75,98,.35); color:var(--red); }
-    .toast.info    { background:#1a2440; border:1px solid rgba(79,134,247,.35); color:var(--blue); }
-    .toast.success { background:#0f2318; border:1px solid rgba(16,185,129,.35); color:#10b981; }
-    [data-theme="light"] .toast.error   { background:#fff; }
-    [data-theme="light"] .toast.info    { background:#fff; }
-    [data-theme="light"] .toast.success { background:#fff; }
+
+    .toast.error {
+      background: #1e1e30;
+      border: 1px solid rgba(240, 75, 98, .35);
+      color: var(--red);
+    }
+
+    .toast.info {
+      background: #1a2440;
+      border: 1px solid rgba(79, 134, 247, .35);
+      color: var(--blue);
+    }
+
+    .toast.success {
+      background: #0f2318;
+      border: 1px solid rgba(16, 185, 129, .35);
+      color: #10b981;
+    }
+
+    [data-theme="light"] .toast.error {
+      background: #fff;
+    }
+
+    [data-theme="light"] .toast.info {
+      background: #fff;
+    }
+
+    [data-theme="light"] .toast.success {
+      background: #fff;
+    }
 
     /* ══════════════ FOOTER ══════════════ */
-    footer { border-top:1px solid var(--border); padding:2rem; text-align:center; color:var(--dim); font-size:.78rem; }
-    .footer-inner { max-width:1300px; margin:0 auto; display:flex; flex-direction:column; gap:.4rem; }
-    footer a { color:var(--blue); text-decoration:none; }
-    footer a:hover { text-decoration:underline; }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--dim);
+      font-size: .78rem;
+    }
+
+    .footer-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    footer a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
 
     /* ══════════════ RESPONSIVE ══════════════ */
     @media (max-width:1024px) {
-      .news-grid,.skel-grid { grid-template-columns:repeat(2,1fr); }
-      .hero-card { grid-template-columns:1fr; }
-      .hero-img-wrap { min-height:230px; }
-      .hero-overlay { background:linear-gradient(to bottom,transparent 55%,var(--surface)); }
+
+      .news-grid,
+      .skel-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .hero-card {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-img-wrap {
+        min-height: 230px;
+      }
+
+      .hero-overlay {
+        background: linear-gradient(to bottom, transparent 55%, var(--surface));
+      }
     }
+
     @media (max-width:640px) {
-      header,.cat-bar { padding:0 1rem; }
-      main { padding:1.5rem 1rem 3rem; }
-      .news-grid,.skel-grid { grid-template-columns:1fr; }
-      .hero-title { font-size:1.35rem; }
-      .hero-content { padding:1.5rem; }
-      .logo-sub,.header-date { display:none; }
-      .settings-panel { width:100%; }
+
+      header,
+      .cat-bar {
+        padding: 0 1rem;
+      }
+
+      main {
+        padding: 1.5rem 1rem 3rem;
+      }
+
+      .news-grid,
+      .skel-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-title {
+        font-size: 1.35rem;
+      }
+
+      .hero-content {
+        padding: 1.5rem;
+      }
+
+      .logo-sub,
+      .header-date {
+        display: none;
+      }
+
+      .settings-panel {
+        width: 100%;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- ══════════════ HEADER ══════════════ -->
-<header>
-  <div class="header-inner">
-    <a class="logo" href="/">
-      <div class="flag">
-        <div class="flag-stripe"></div>
-        <div class="flag-white"><span class="flag-star">✦</span></div>
-        <div class="flag-stripe"></div>
-      </div>
-      <div class="logo-text">
-        <span class="logo-title">SnapNews IL</span>
-        <span class="logo-sub" data-i18n="liveUpdates">Live Updates</span>
-      </div>
-    </a>
-    <div class="header-right">
-<div class="header-date" id="headerDate"></div>
-      <button class="settings-btn" id="settingsBtn" onclick="openSettings()" aria-label="Settings">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-</header>
-
-<!-- ══════════════ CATEGORY BAR ══════════════ -->
-<div class="cat-bar">
-  <div class="cat-inner" id="catInner">
-    <button class="cat-btn active" data-api="rss" data-category="all"        data-lang="he" data-i18n="allNews">All News</button>
-    <button class="cat-btn"        data-api="rss" data-category="politics"   data-lang="he" data-i18n="politics">Politics</button>
-    <button class="cat-btn"        data-api="rss" data-category="security"   data-lang="he" data-i18n="security">Security</button>
-    <button class="cat-btn"        data-api="rss" data-category="economy"    data-lang="he" data-i18n="economy">Economy</button>
-    <button class="cat-btn"        data-api="rss" data-category="diplomacy"  data-lang="he" data-i18n="diplomacy">Diplomacy</button>
-    <button class="cat-btn"        data-api="rss" data-category="society"    data-lang="he" data-i18n="society">Society</button>
-    <button class="cat-btn"        data-api="rss" data-category="technology" data-lang="he" data-i18n="technology">Technology</button>
-    <button class="cat-btn"        data-api="rss" data-category="ai"         data-lang="he" data-i18n="aiNews">🤖 AI</button>
-    <div class="cat-divider"></div>
-    <button class="cat-btn cat-btn--world" data-api="rss" data-category="world" data-lang="en" data-i18n="worldView">🌍 World View</button>
-  </div>
-</div>
-
-<!-- ══════════════ MAIN ══════════════ -->
-<main>
-  <div class="section-label">
-    <h2 data-i18n="latestStories">Latest Stories</h2>
-    <div class="divider"></div>
-  </div>
-  <div id="heroArea"></div>
-  <div id="gridArea">
-    <div class="skel-grid" id="skelGrid">
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:90%"></div><div class="skel-line" style="height:18px;width:65%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:80%"></div><div class="skel-line" style="height:13px;width:55%"></div></div></div>
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:85%"></div><div class="skel-line" style="height:18px;width:70%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:90%"></div><div class="skel-line" style="height:13px;width:60%"></div></div></div>
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:95%"></div><div class="skel-line" style="height:18px;width:60%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:85%"></div><div class="skel-line" style="height:13px;width:70%"></div></div></div>
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:88%"></div><div class="skel-line" style="height:18px;width:75%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:78%"></div><div class="skel-line" style="height:13px;width:50%"></div></div></div>
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:80%"></div><div class="skel-line" style="height:18px;width:68%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:92%"></div><div class="skel-line" style="height:13px;width:65%"></div></div></div>
-      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:93%"></div><div class="skel-line" style="height:18px;width:72%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:87%"></div><div class="skel-line" style="height:13px;width:58%"></div></div></div>
-    </div>
-  </div>
-  <div class="load-more-wrap">
-    <button class="load-more-btn" id="loadMoreBtn" style="display:none" onclick="loadMore()" data-i18n="loadMore">Load More Stories</button>
-  </div>
-</main>
-
-<!-- ══════════════ FOOTER ══════════════ -->
-<footer>
-  <div class="footer-inner">
-    <p data-i18n="footerLine1">News sourced from <a href="https://newsapi.org" target="_blank" rel="noopener">NewsAPI.org</a> &nbsp;·&nbsp; AI by <a href="https://openai.com" target="_blank" rel="noopener">GPT-4o</a></p>
-    <p style="opacity:.5" data-i18n="footerLine2">Updated in real time · Summaries and translations are AI-generated</p>
-  </div>
-</footer>
-
-<!-- ══════════════ SETTINGS OVERLAY + PANEL ══════════════ -->
-<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
-
-<div class="settings-panel" id="settingsPanel" role="dialog" aria-label="Settings">
-  <div class="settings-head">
-    <h3 data-i18n="settings">Settings</h3>
-    <button class="settings-close" onclick="closeSettings()">✕</button>
-  </div>
-  <div class="settings-body">
-
-    <!-- Theme -->
-    <div class="settings-section">
-      <label data-i18n="theme">Theme</label>
-      <div class="opt-pills">
-        <button class="opt-pill" id="pill-dark"  onclick="setTheme('dark')"  data-i18n="dark">Dark</button>
-        <button class="opt-pill opt-pill--light" id="pill-light" onclick="setTheme('light')" data-i18n="light">Light</button>
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header>
+    <div class="header-inner">
+      <a class="logo" href="/">
+        <div class="flag">
+          <div class="flag-stripe"></div>
+          <div class="flag-white"><span class="flag-star">✦</span></div>
+          <div class="flag-stripe"></div>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">SnapNews IL</span>
+          <span class="logo-sub" data-i18n="liveUpdates">Live Updates</span>
+        </div>
+      </a>
+      <div class="header-right">
+        <div class="header-date" id="headerDate"></div>
+        <button class="settings-btn" id="settingsBtn" onclick="openSettings()" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
       </div>
     </div>
+  </header>
 
-    <!-- UI Language -->
-    <div class="settings-section">
-      <label data-i18n="uiLanguage">UI Language</label>
-      <div class="opt-pills">
-        <button class="opt-pill" id="pill-en" onclick="setUiLang('en')">English</button>
-        <button class="opt-pill" id="pill-he" onclick="setUiLang('he')">עברית</button>
-      </div>
+  <!-- ══════════════ CATEGORY BAR ══════════════ -->
+  <div class="cat-bar">
+    <div class="cat-inner" id="catInner">
+      <button class="cat-btn active" data-api="rss" data-category="all" data-lang="he" data-i18n="allNews">All
+        News</button>
+      <button class="cat-btn" data-api="rss" data-category="politics" data-lang="he"
+        data-i18n="politics">Politics</button>
+      <button class="cat-btn" data-api="rss" data-category="security" data-lang="he"
+        data-i18n="security">Security</button>
+      <button class="cat-btn" data-api="rss" data-category="economy" data-lang="he" data-i18n="economy">Economy</button>
+      <button class="cat-btn" data-api="rss" data-category="diplomacy" data-lang="he"
+        data-i18n="diplomacy">Diplomacy</button>
+      <button class="cat-btn" data-api="rss" data-category="society" data-lang="he" data-i18n="society">Society</button>
+      <button class="cat-btn" data-api="rss" data-category="technology" data-lang="he"
+        data-i18n="technology">Technology</button>
+      <button class="cat-btn" data-api="rss" data-category="ai" data-lang="he" data-i18n="aiNews">🤖 AI</button>
+      <div class="cat-divider"></div>
+      <button class="cat-btn cat-btn--world" data-api="rss" data-category="world" data-lang="en"
+        data-i18n="worldView">🌍 World View</button>
+      <button class="cat-btn cat-btn--world" data-api="news" data-category="world_israel" data-lang="en"
+        data-i18n="worldViewIsrael">🌍 World View Israel</button>
     </div>
-
-    <!-- Article Font -->
-    <div class="settings-section">
-      <label data-i18n="articleFont">Article Font</label>
-      <div class="opt-pills">
-        <button class="opt-pill" id="pill-font-heebo"     onclick="setFont('heebo')"     data-i18n="fontHeebo"     style="font-family:'Heebo',sans-serif">Heebo</button>
-        <button class="opt-pill" id="pill-font-rubik"     onclick="setFont('rubik')"     data-i18n="fontRubik"     style="font-family:'Rubik',sans-serif">Rubik</button>
-        <button class="opt-pill" id="pill-font-frankruhl" onclick="setFont('frankruhl')" data-i18n="fontFrankRuhl" style="font-family:'Frank Ruhl Libre',serif">Frank Ruhl</button>
-        <button class="opt-pill" id="pill-font-assistant" onclick="setFont('assistant')" data-i18n="fontAssistant" style="font-family:'Assistant',sans-serif">Assistant</button>
-      </div>
-    </div>
-
-    <!-- Article Translation -->
-    <div class="settings-section">
-      <label data-i18n="translateArticles">Translate Articles</label>
-      <select class="settings-select" id="translateSelect" onchange="setTranslateTo(this.value)">
-        <option value=""  data-i18n="translateOff">Off – show original</option>
-        <option value="he">עברית (Hebrew)</option>
-        <option value="en">English</option>
-        <option value="ar">عربية (Arabic)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="fr">Français (French)</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="de">Deutsch (German)</option>
-      </select>
-      <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded articles.</p>
-    </div>
-
-    <!-- Summary Length -->
-    <div class="settings-section">
-      <label data-i18n="summaryLength">Summary Length</label>
-      <div class="slider-row">
-        <span>2</span>
-        <input type="range" id="summarySlider" min="2" max="10" step="1"
-               oninput="setSummaryLength(+this.value)">
-        <span class="slider-val" id="summaryVal">3</span>
-        <span data-i18n="sentences">sentences</span>
-      </div>
-      <p class="settings-hint" data-i18n="summaryLengthHint"></p>
-    </div>
-
   </div>
-</div>
 
-<!-- API Key Modal -->
-<div class="modal-overlay" id="apiKeyModal" style="display:none">
-  <div class="modal-card">
-    <div class="modal-icon">🔑</div>
-    <h2 class="modal-title">OpenAI API Key Required</h2>
-    <p class="modal-desc">AI summaries and article translation use GPT-4o and require an OpenAI API key. Enter your key below — it will be saved in the server's <code>.env</code> file.</p>
-    <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." autocomplete="off" spellcheck="false" />
-    <p class="modal-error" id="apiKeyError"></p>
-    <button class="modal-save-btn" id="apiKeySaveBtn" onclick="saveApiKey()">Save Key</button>
-    <button class="modal-skip-btn" onclick="closeApiKeyModal()">Skip — disable AI features</button>
-    <p class="modal-hint">Your key is stored only on this server and never sent elsewhere.</p>
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main>
+    <div class="section-label">
+      <h2 data-i18n="latestStories">Latest Stories</h2>
+      <div class="divider"></div>
+    </div>
+    <div id="heroArea"></div>
+    <div id="gridArea">
+      <div class="skel-grid" id="skelGrid">
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:90%"></div>
+            <div class="skel-line" style="height:18px;width:65%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:80%"></div>
+            <div class="skel-line" style="height:13px;width:55%"></div>
+          </div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:85%"></div>
+            <div class="skel-line" style="height:18px;width:70%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:90%"></div>
+            <div class="skel-line" style="height:13px;width:60%"></div>
+          </div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:95%"></div>
+            <div class="skel-line" style="height:18px;width:60%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:85%"></div>
+            <div class="skel-line" style="height:13px;width:70%"></div>
+          </div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:88%"></div>
+            <div class="skel-line" style="height:18px;width:75%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:78%"></div>
+            <div class="skel-line" style="height:13px;width:50%"></div>
+          </div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:80%"></div>
+            <div class="skel-line" style="height:18px;width:68%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:92%"></div>
+            <div class="skel-line" style="height:13px;width:65%"></div>
+          </div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-img"></div>
+          <div class="skel-body">
+            <div class="skel-line" style="height:18px;width:93%"></div>
+            <div class="skel-line" style="height:18px;width:72%"></div>
+            <div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div>
+            <div class="skel-line" style="height:13px;width:87%"></div>
+            <div class="skel-line" style="height:13px;width:58%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="load-more-wrap">
+      <button class="load-more-btn" id="loadMoreBtn" style="display:none" onclick="loadMore()" data-i18n="loadMore">Load
+        More Stories</button>
+    </div>
+  </main>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer>
+    <div class="footer-inner">
+      <p data-i18n="footerLine1">News sourced from <a href="https://newsapi.org" target="_blank"
+          rel="noopener">NewsAPI.org</a> &nbsp;·&nbsp; AI by <a href="https://openai.com" target="_blank"
+          rel="noopener">GPT-4o</a></p>
+      <p style="opacity:.5" data-i18n="footerLine2">Updated in real time · Summaries and translations are AI-generated
+      </p>
+    </div>
+  </footer>
+
+  <!-- ══════════════ SETTINGS OVERLAY + PANEL ══════════════ -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+
+  <div class="settings-panel" id="settingsPanel" role="dialog" aria-label="Settings">
+    <div class="settings-head">
+      <h3 data-i18n="settings">Settings</h3>
+      <button class="settings-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-body">
+
+      <!-- Theme -->
+      <div class="settings-section">
+        <label data-i18n="theme">Theme</label>
+        <div class="opt-pills">
+          <button class="opt-pill" id="pill-dark" onclick="setTheme('dark')" data-i18n="dark">Dark</button>
+          <button class="opt-pill opt-pill--light" id="pill-light" onclick="setTheme('light')"
+            data-i18n="light">Light</button>
+        </div>
+      </div>
+
+      <!-- UI Language -->
+      <div class="settings-section">
+        <label data-i18n="uiLanguage">UI Language</label>
+        <div class="opt-pills">
+          <button class="opt-pill" id="pill-en" onclick="setUiLang('en')">English</button>
+          <button class="opt-pill" id="pill-he" onclick="setUiLang('he')">עברית</button>
+        </div>
+      </div>
+
+      <!-- Article Font -->
+      <div class="settings-section">
+        <label data-i18n="articleFont">Article Font</label>
+        <div class="opt-pills">
+          <button class="opt-pill" id="pill-font-heebo" onclick="setFont('heebo')" data-i18n="fontHeebo"
+            style="font-family:'Heebo',sans-serif">Heebo</button>
+          <button class="opt-pill" id="pill-font-rubik" onclick="setFont('rubik')" data-i18n="fontRubik"
+            style="font-family:'Rubik',sans-serif">Rubik</button>
+          <button class="opt-pill" id="pill-font-frankruhl" onclick="setFont('frankruhl')" data-i18n="fontFrankRuhl"
+            style="font-family:'Frank Ruhl Libre',serif">Frank Ruhl</button>
+          <button class="opt-pill" id="pill-font-assistant" onclick="setFont('assistant')" data-i18n="fontAssistant"
+            style="font-family:'Assistant',sans-serif">Assistant</button>
+        </div>
+      </div>
+
+      <!-- Article Translation -->
+      <div class="settings-section">
+        <label data-i18n="translateArticles">Translate Articles</label>
+        <select class="settings-select" id="translateSelect" onchange="setTranslateTo(this.value)">
+          <option value="" data-i18n="translateOff">Off – show original</option>
+          <option value="he">עברית (Hebrew)</option>
+          <option value="en">English</option>
+          <option value="ar">عربية (Arabic)</option>
+          <option value="ru">Русский (Russian)</option>
+          <option value="fr">Français (French)</option>
+          <option value="es">Español (Spanish)</option>
+          <option value="de">Deutsch (German)</option>
+        </select>
+        <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded
+          articles.</p>
+      </div>
+
+      <!-- Summary Length -->
+      <div class="settings-section">
+        <label data-i18n="summaryLength">Summary Length</label>
+        <div class="slider-row">
+          <span>2</span>
+          <input type="range" id="summarySlider" min="2" max="10" step="1" oninput="setSummaryLength(+this.value)">
+          <span class="slider-val" id="summaryVal">3</span>
+          <span data-i18n="sentences">sentences</span>
+        </div>
+        <p class="settings-hint" data-i18n="summaryLengthHint"></p>
+      </div>
+
+    </div>
   </div>
-</div>
 
-<!-- Toast -->
-<div class="toast" id="_toast"></div>
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="apiKeyModal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-icon">🔑</div>
+      <h2 class="modal-title">OpenAI API Key Required</h2>
+      <p class="modal-desc">AI summaries and article translation use GPT-4o and require an OpenAI API key. Enter your
+        key below — it will be saved in the server's <code>.env</code> file.</p>
+      <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." autocomplete="off"
+        spellcheck="false" />
+      <p class="modal-error" id="apiKeyError"></p>
+      <button class="modal-save-btn" id="apiKeySaveBtn" onclick="saveApiKey()">Save Key</button>
+      <button class="modal-skip-btn" onclick="closeApiKeyModal()">Skip — disable AI features</button>
+      <p class="modal-hint">Your key is stored only on this server and never sent elsewhere.</p>
+    </div>
+  </div>
 
-<script>
-  // ══════════════ I18N ══════════════
-  const I18N = {
-    en: {
-      liveUpdates:      'Live Updates',
-      latestStories:    'Latest Stories',
-      allNews:          'All News',
-      politics:         'Politics',
-      security:         'Security',
-      economy:          'Economy',
-      diplomacy:        'Diplomacy',
-      society:          'Society',
-      technology:       'Technology',
-      worldView:        '🌍 World View',
-      aiNews:           '🤖 AI',
-      loadMore:         'Load More Stories',
-      aiSummary:        'AI Summary',
-      aiSummaryLabel:   'AI Summary',
-      summaryReady:     'Summary ready',
-      summarising:      'Summarising…',
-      readMore:         'Read more →',
-      readFullStory:    'Read Full Story →',
-      breaking:         '⚡ Breaking',
-      justNow:          'Just now',
-      settings:         'Settings',
-      theme:            'Theme',
-      dark:             'Dark',
-      light:            'Light',
-      uiLanguage:       'UI Language',
-      translateArticles:'Translate Articles',
-      translateOff:     'Off – show original',
-      translateHint:    'Uses GPT-4o to translate titles and descriptions of loaded articles.',
-      translatedBadge:  '🌐 Translated',
-      translating:      'Translating articles…',
-      noArticles:       'No articles found',
-      noArticlesSub:    'Try a different category or check back shortly.',
-      couldNotLoad:     'Could not load news',
-      footerLine1:      null, // HTML – skip
-      footerLine2:      'Updated in real time · Summaries and translations are AI-generated',
-      articleFont:      'Article Font',
-      fontHeebo:        'Heebo',
-      fontRubik:        'Rubik',
-      fontFrankRuhl:    'Frank Ruhl',
-      fontAssistant:    'Assistant',
-      israeliMedia:      '🗞️ Israeli Media',
-      synthesizeTitle:   '✨ Synthesize title',
-      synthesizing:      'Synthesizing…',
-      summaryLength:     'Summary Length',
-      sentences:         'sentences',
-      summaryLengthHint: 'Shorter = faster & cheaper. Longer = more detail.',
-    },
-    he: {
-      liveUpdates:      'עדכונים חיים',
-      latestStories:    'סיפורים אחרונים',
-      allNews:          'כל החדשות',
-      politics:         'פוליטיקה',
-      security:         'ביטחון',
-      economy:          'כלכלה',
-      diplomacy:        'דיפלומטיה',
-      society:          'חברה',
-      technology:       'טכנולוגיה',
-      worldView:        '🌍 מבט עולמי',
-      loadMore:         'טען עוד',
-      aiSummary:        'סיכום AI',
-      aiSummaryLabel:   'סיכום AI',
-      summaryReady:     'הסיכום מוכן',
-      summarising:      'מסכם…',
-      readMore:         '← קרא עוד',
-      readFullStory:    '← קרא את הסיפור המלא',
-      breaking:         '⚡ בשעה זו',
-      justNow:          'עכשיו',
-      settings:         'הגדרות',
-      theme:            'ערכת נושא',
-      dark:             'כהה',
-      light:            'בהיר',
-      uiLanguage:       'שפת ממשק',
-      translateArticles:'תרגם כתבות',
-      translateOff:     'כבוי – הצג מקור',
-      translateHint:    'משתמש ב-GPT-4o לתרגום כותרות ותיאורים של הכתבות.',
-      translatedBadge:  '🌐 מתורגם',
-      translating:      'מתרגם כתבות…',
-      noArticles:       'לא נמצאו כתבות',
-      noArticlesSub:    'נסה קטגוריה אחרת או חזור מאוחר יותר.',
-      couldNotLoad:     'לא ניתן לטעון חדשות',
-      footerLine1:      null,
-      footerLine2:      'מתעדכן בזמן אמת · סיכומים ותרגומים נוצרים ע"י AI',
-      articleFont:      'גופן כתבות',
-      fontHeebo:        'הבו',
-      fontRubik:        'רוביק',
-      fontFrankRuhl:    'פרנק רוהל',
-      fontAssistant:    'אסיסטנט',
-      israeliMedia:      '🗞️ ישראלי',
-      synthesizeTitle:   '✨ נסח מחדש',
-      synthesizing:      'מנסח…',
-      summaryLength:     'אורך הסיכום',
-      sentences:         'משפטים',
-      summaryLengthHint: 'פחות = מהיר יותר. יותר = פרטים נוספים.',
-    },
-  };
+  <!-- Toast -->
+  <div class="toast" id="_toast"></div>
 
-  function t(key) {
-    return I18N[settings.uiLang]?.[key] ?? I18N.en[key] ?? key;
-  }
+  <script>
+    // ══════════════ I18N ══════════════
+    const I18N = {
+      en: {
+        liveUpdates: 'Live Updates',
+        latestStories: 'Latest Stories',
+        allNews: 'All News',
+        politics: 'Politics',
+        security: 'Security',
+        economy: 'Economy',
+        diplomacy: 'Diplomacy',
+        society: 'Society',
+        technology: 'Technology',
+        worldView: '🌍 World View',
+        worldViewIsrael: '🌍 World View Israel',
+        aiNews: '🤖 AI',
+        loadMore: 'Load More Stories',
+        aiSummary: 'AI Summary',
+        aiSummaryLabel: 'AI Summary',
+        summaryReady: 'Summary ready',
+        summarising: 'Summarising…',
+        readMore: 'Read more →',
+        readFullStory: 'Read Full Story →',
+        breaking: '⚡ Breaking',
+        justNow: 'Just now',
+        settings: 'Settings',
+        theme: 'Theme',
+        dark: 'Dark',
+        light: 'Light',
+        uiLanguage: 'UI Language',
+        translateArticles: 'Translate Articles',
+        translateOff: 'Off – show original',
+        translateHint: 'Uses GPT-4o to translate titles and descriptions of loaded articles.',
+        translatedBadge: '🌐 Translated',
+        translating: 'Translating articles…',
+        noArticles: 'No articles found',
+        noArticlesSub: 'Try a different category or check back shortly.',
+        couldNotLoad: 'Could not load news',
+        footerLine1: null, // HTML – skip
+        footerLine2: 'Updated in real time · Summaries and translations are AI-generated',
+        articleFont: 'Article Font',
+        fontHeebo: 'Heebo',
+        fontRubik: 'Rubik',
+        fontFrankRuhl: 'Frank Ruhl',
+        fontAssistant: 'Assistant',
+        israeliMedia: '🗞️ Israeli Media',
+        synthesizeTitle: '✨ Synthesize title',
+        synthesizing: 'Synthesizing…',
+        summaryLength: 'Summary Length',
+        sentences: 'sentences',
+        summaryLengthHint: 'Shorter = faster & cheaper. Longer = more detail.',
+      },
+      he: {
+        liveUpdates: 'עדכונים חיים',
+        latestStories: 'סיפורים אחרונים',
+        allNews: 'כל החדשות',
+        politics: 'פוליטיקה',
+        security: 'ביטחון',
+        economy: 'כלכלה',
+        diplomacy: 'דיפלומטיה',
+        society: 'חברה',
+        technology: 'טכנולוגיה',
+        worldView: '🌍 מבט עולמי',
+        worldViewIsrael: '🌍 מבט עולמי: ישראל',
+        loadMore: 'טען עוד',
+        aiSummary: 'סיכום AI',
+        aiSummaryLabel: 'סיכום AI',
+        summaryReady: 'הסיכום מוכן',
+        summarising: 'מסכם…',
+        readMore: '← קרא עוד',
+        readFullStory: '← קרא את הסיפור המלא',
+        breaking: '⚡ בשעה זו',
+        justNow: 'עכשיו',
+        settings: 'הגדרות',
+        theme: 'ערכת נושא',
+        dark: 'כהה',
+        light: 'בהיר',
+        uiLanguage: 'שפת ממשק',
+        translateArticles: 'תרגם כתבות',
+        translateOff: 'כבוי – הצג מקור',
+        translateHint: 'משתמש ב-GPT-4o לתרגום כותרות ותיאורים של הכתבות.',
+        translatedBadge: '🌐 מתורגם',
+        translating: 'מתרגם כתבות…',
+        noArticles: 'לא נמצאו כתבות',
+        noArticlesSub: 'נסה קטגוריה אחרת או חזור מאוחר יותר.',
+        couldNotLoad: 'לא ניתן לטעון חדשות',
+        footerLine1: null,
+        footerLine2: 'מתעדכן בזמן אמת · סיכומים ותרגומים נוצרים ע"י AI',
+        articleFont: 'גופן כתבות',
+        fontHeebo: 'הבו',
+        fontRubik: 'רוביק',
+        fontFrankRuhl: 'פרנק רוהל',
+        fontAssistant: 'אסיסטנט',
+        israeliMedia: '🗞️ ישראלי',
+        synthesizeTitle: '✨ נסח מחדש',
+        synthesizing: 'מנסח…',
+        summaryLength: 'אורך הסיכום',
+        sentences: 'משפטים',
+        summaryLengthHint: 'פחות = מהיר יותר. יותר = פרטים נוספים.',
+      },
+    };
 
-  // ══════════════ SETTINGS STATE ══════════════
-  const settings = {
-    theme:         localStorage.getItem('news-theme')           || 'dark',
-    uiLang:        localStorage.getItem('news-ui-lang')         || 'en',
-    translateTo:   localStorage.getItem('news-translate-to')    || '',
-    font:          localStorage.getItem('news-font')            || 'heebo',
-    summaryLength: parseInt(localStorage.getItem('news-summary-length') || '3', 10),
-  };
-
-  const FONT_FAMILIES = {
-    heebo:     "'Heebo','Inter',system-ui,sans-serif",
-    rubik:     "'Rubik','Inter',system-ui,sans-serif",
-    frankruhl: "'Frank Ruhl Libre',Georgia,serif",
-    assistant: "'Assistant','Inter',system-ui,sans-serif",
-  };
-
-  function setFont(font) {
-    settings.font = font;
-    localStorage.setItem('news-font', font);
-    document.documentElement.style.setProperty('--article-font', FONT_FAMILIES[font]);
-    ['heebo', 'rubik', 'frankruhl', 'assistant'].forEach(f => {
-      document.getElementById(`pill-font-${f}`)?.classList.toggle('active', f === font);
-    });
-  }
-
-  function setTheme(theme) {
-    settings.theme = theme;
-    localStorage.setItem('news-theme', theme);
-    document.documentElement.dataset.theme = theme;
-    document.getElementById('pill-dark') .classList.toggle('active', theme === 'dark');
-    document.getElementById('pill-light').classList.toggle('active', theme === 'light');
-  }
-
-  function setUiLang(lang) {
-    settings.uiLang = lang;
-    localStorage.setItem('news-ui-lang', lang);
-    document.documentElement.lang = lang;
-    document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
-    document.getElementById('pill-en').classList.toggle('active', lang === 'en');
-    document.getElementById('pill-he').classList.toggle('active', lang === 'he');
-    updateUiText();
-  }
-
-  function setSummaryLength(n) {
-    n = Math.min(10, Math.max(2, n));
-    settings.summaryLength = n;
-    localStorage.setItem('news-summary-length', n);
-    const val    = document.getElementById('summaryVal');
-    const slider = document.getElementById('summarySlider');
-    if (val)    val.textContent = n;
-    if (slider) slider.value   = n;
-  }
-
-  function setTranslateTo(lang) {
-    settings.translateTo = lang;
-    localStorage.setItem('news-translate-to', lang);
-    if (!lang) {
-      clearTranslations();
-    } else if (currentArticles.length) {
-      maybeTranslate(currentArticles);
-    }
-  }
-
-  function applySettings() {
-    setTheme(settings.theme);
-    setUiLang(settings.uiLang);
-    setFont(settings.font);
-    document.getElementById('translateSelect').value = settings.translateTo;
-    setSummaryLength(settings.summaryLength);
-  }
-
-  function updateUiText() {
-    // Update all [data-i18n] elements that have plain text content
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.dataset.i18n;
-      const val = t(key);
-      if (val !== null) el.textContent = val;
-    });
-  }
-
-  function openSettings() {
-    document.getElementById('settingsPanel') .classList.add('open');
-    document.getElementById('settingsOverlay').classList.add('open');
-  }
-  function closeSettings() {
-    document.getElementById('settingsPanel') .classList.remove('open');
-    document.getElementById('settingsOverlay').classList.remove('open');
-  }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
-
-  // ══════════════ APP STATE ══════════════
-  const FALLBACK_COLORS = ['#1a2e4a','#1a3a2f','#2e1a3a','#3a2a1a','#1a2e38','#2a1a3a','#1e3028','#2e1e18'];
-  let page     = 1;
-  let category = 'all';
-  let lang     = 'he';
-  let busy     = false;
-  let more          = true;
-  let currentArticles = [];   // accumulates across pages for batch translate
-
-  // ══════════════ API KEY MODAL ══════════════
-  async function checkApiKey() {
-    try {
-      const res  = await fetch('/api/config-status');
-      const data = await res.json();
-      if (!data.openaiKeySet) {
-        document.getElementById('apiKeyModal').style.display = 'flex';
-      }
-    } catch (_) { /* server unreachable — skip silently */ }
-  }
-
-  function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').style.display = 'none';
-  }
-
-  async function saveApiKey() {
-    const key   = document.getElementById('apiKeyInput').value.trim();
-    const errEl = document.getElementById('apiKeyError');
-    const btn   = document.getElementById('apiKeySaveBtn');
-    errEl.textContent = '';
-
-    if (!key.startsWith('sk-')) {
-      errEl.textContent = 'Key must start with sk-';
-      return;
+    function t(key) {
+      return I18N[settings.uiLang]?.[key] ?? I18N.en[key] ?? key;
     }
 
-    btn.disabled    = true;
-    btn.textContent = 'Saving…';
-    try {
-      const res = await fetch('/api/save-key', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ key }),
+    // ══════════════ SETTINGS STATE ══════════════
+    const settings = {
+      theme: localStorage.getItem('news-theme') || 'dark',
+      uiLang: localStorage.getItem('news-ui-lang') || 'en',
+      translateTo: localStorage.getItem('news-translate-to') || '',
+      font: localStorage.getItem('news-font') || 'heebo',
+      summaryLength: parseInt(localStorage.getItem('news-summary-length') || '3', 10),
+    };
+
+    const FONT_FAMILIES = {
+      heebo: "'Heebo','Inter',system-ui,sans-serif",
+      rubik: "'Rubik','Inter',system-ui,sans-serif",
+      frankruhl: "'Frank Ruhl Libre',Georgia,serif",
+      assistant: "'Assistant','Inter',system-ui,sans-serif",
+    };
+
+    function setFont(font) {
+      settings.font = font;
+      localStorage.setItem('news-font', font);
+      document.documentElement.style.setProperty('--article-font', FONT_FAMILIES[font]);
+      ['heebo', 'rubik', 'frankruhl', 'assistant'].forEach(f => {
+        document.getElementById(`pill-font-${f}`)?.classList.toggle('active', f === font);
       });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
-      closeApiKeyModal();
-      showToast('OpenAI API key saved — AI features enabled', 'success');
-    } catch (e) {
-      errEl.textContent   = e.message;
-      btn.disabled        = false;
-      btn.textContent     = 'Save Key';
     }
-  }
 
-  // Allow Enter key to submit the modal
-  document.getElementById('apiKeyInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveApiKey();
-  });
+    function setTheme(theme) {
+      settings.theme = theme;
+      localStorage.setItem('news-theme', theme);
+      document.documentElement.dataset.theme = theme;
+      document.getElementById('pill-dark').classList.toggle('active', theme === 'dark');
+      document.getElementById('pill-light').classList.toggle('active', theme === 'light');
+    }
 
-  // ══════════════ BOOT ══════════════
-  applySettings();
-  document.getElementById('headerDate').textContent = new Date().toLocaleDateString(
-    settings.uiLang === 'he' ? 'he-IL' : 'en-US',
-    { weekday:'long', year:'numeric', month:'long', day:'numeric' }
-  );
+    function setUiLang(lang) {
+      settings.uiLang = lang;
+      localStorage.setItem('news-ui-lang', lang);
+      document.documentElement.lang = lang;
+      document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
+      document.getElementById('pill-en').classList.toggle('active', lang === 'en');
+      document.getElementById('pill-he').classList.toggle('active', lang === 'he');
+      updateUiText();
+    }
 
-  document.getElementById('catInner').addEventListener('click', e => {
-    const btn = e.target.closest('.cat-btn');
-    if (!btn) return;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    category = btn.dataset.category || 'all';
-    lang     = btn.dataset.lang     || 'he';
-    page          = 1; more = true; currentArticles = [];
-    document.getElementById('heroArea').innerHTML = '';
-    document.getElementById('gridArea').innerHTML = skelHtml(6);
-    document.getElementById('loadMoreBtn').style.display = 'none';
+    function setSummaryLength(n) {
+      n = Math.min(10, Math.max(2, n));
+      settings.summaryLength = n;
+      localStorage.setItem('news-summary-length', n);
+      const val = document.getElementById('summaryVal');
+      const slider = document.getElementById('summarySlider');
+      if (val) val.textContent = n;
+      if (slider) slider.value = n;
+    }
+
+    function setTranslateTo(lang) {
+      settings.translateTo = lang;
+      localStorage.setItem('news-translate-to', lang);
+      if (!lang) {
+        clearTranslations();
+      } else if (currentArticles.length) {
+        maybeTranslate(currentArticles);
+      }
+    }
+
+    function applySettings() {
+      setTheme(settings.theme);
+      setUiLang(settings.uiLang);
+      setFont(settings.font);
+      document.getElementById('translateSelect').value = settings.translateTo;
+      setSummaryLength(settings.summaryLength);
+    }
+
+    function updateUiText() {
+      // Update all [data-i18n] elements that have plain text content
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const val = t(key);
+        if (val !== null) el.textContent = val;
+      });
+    }
+
+    function openSettings() {
+      document.getElementById('settingsPanel').classList.add('open');
+      document.getElementById('settingsOverlay').classList.add('open');
+    }
+    function closeSettings() {
+      document.getElementById('settingsPanel').classList.remove('open');
+      document.getElementById('settingsOverlay').classList.remove('open');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+
+    // ══════════════ APP STATE ══════════════
+    const FALLBACK_COLORS = ['#1a2e4a', '#1a3a2f', '#2e1a3a', '#3a2a1a', '#1a2e38', '#2a1a3a', '#1e3028', '#2e1e18'];
+    let page = 1;
+    let category = 'all';
+    let apiType = 'rss';
+    let lang = 'he';
+    let busy = false;
+    let more = true;
+    let currentArticles = [];   // accumulates across pages for batch translate
+
+    // ══════════════ API KEY MODAL ══════════════
+    async function checkApiKey() {
+      try {
+        const res = await fetch('/api/config-status');
+        const data = await res.json();
+        if (!data.openaiKeySet) {
+          document.getElementById('apiKeyModal').style.display = 'flex';
+        }
+      } catch (_) { /* server unreachable — skip silently */ }
+    }
+
+    function closeApiKeyModal() {
+      document.getElementById('apiKeyModal').style.display = 'none';
+    }
+
+    async function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      const errEl = document.getElementById('apiKeyError');
+      const btn = document.getElementById('apiKeySaveBtn');
+      errEl.textContent = '';
+
+      if (!key.startsWith('sk-')) {
+        errEl.textContent = 'Key must start with sk-';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      try {
+        const res = await fetch('/api/save-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key }),
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
+        closeApiKeyModal();
+        showToast('OpenAI API key saved — AI features enabled', 'success');
+      } catch (e) {
+        errEl.textContent = e.message;
+        btn.disabled = false;
+        btn.textContent = 'Save Key';
+      }
+    }
+
+    // Allow Enter key to submit the modal
+    document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveApiKey();
+    });
+
+    // ══════════════ BOOT ══════════════
+    applySettings();
+    document.getElementById('headerDate').textContent = new Date().toLocaleDateString(
+      settings.uiLang === 'he' ? 'he-IL' : 'en-US',
+      { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+    );
+
+    document.getElementById('catInner').addEventListener('click', e => {
+      const btn = e.target.closest('.cat-btn');
+      if (!btn) return;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      category = btn.dataset.category || 'all';
+      apiType = btn.dataset.api || 'rss';
+      lang = btn.dataset.lang || 'he';
+      page = 1; more = true; currentArticles = [];
+      document.getElementById('heroArea').innerHTML = '';
+      document.getElementById('gridArea').innerHTML = skelHtml(6);
+      document.getElementById('loadMoreBtn').style.display = 'none';
+      fetchNews(true);
+    });
+
     fetchNews(true);
-  });
+    checkApiKey();
 
-  fetchNews(true);
-  checkApiKey();
+    // ══════════════ FETCH ══════════════
+    async function fetchNews(reset) {
+      if (busy) return;
+      busy = true;
+      try {
+        const endpoint = apiType === 'news'
+          ? `/api/news?page=${page}&q=Israel&lang=${lang}`
+          : `/api/rss?page=${page}&category=${encodeURIComponent(category)}`;
 
-  // ══════════════ FETCH ══════════════
-  async function fetchNews(reset) {
-    if (busy) return;
-    busy = true;
-    try {
-      const endpoint = `/api/rss?page=${page}&category=${encodeURIComponent(category)}`;
-      const r = await fetch(endpoint);
-      if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
-      const data = await r.json();
-      reset ? renderReset(data.articles) : appendCards(data.articles);
-      currentArticles.push(...data.articles);
-      more = data.articles.length === (data.pageSize || 12);
-      document.getElementById('loadMoreBtn').style.display = more ? 'block' : 'none';
-      if (settings.translateTo) maybeTranslate(data.articles);
-    } catch (err) {
-      document.getElementById('gridArea').innerHTML = `
+        const r = await fetch(endpoint);
+        if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+        const data = await r.json();
+        reset ? renderReset(data.articles) : appendCards(data.articles);
+        currentArticles.push(...data.articles);
+        more = data.articles.length === (data.pageSize || 12);
+        document.getElementById('loadMoreBtn').style.display = more ? 'block' : 'none';
+        if (settings.translateTo) maybeTranslate(data.articles);
+      } catch (err) {
+        document.getElementById('gridArea').innerHTML = `
         <div class="state-box">
           <h3>${t('couldNotLoad')}</h3>
           <p>${esc(err.message)}</p>
           <p style="margin-top:1rem;font-size:.82rem;opacity:.7">Check the server console for details.</p>
         </div>`;
-    } finally { busy = false; }
-  }
-
-  function loadMore() {
-    page++;
-    const btn = document.getElementById('loadMoreBtn');
-    btn.disabled = true; btn.textContent = '…';
-    fetchNews(false).then(() => { btn.disabled = false; btn.textContent = t('loadMore'); });
-  }
-
-  // ══════════════ RENDER ══════════════
-  function renderReset(articles) {
-    if (!articles?.length) {
-      document.getElementById('heroArea').innerHTML = '';
-      document.getElementById('gridArea').innerHTML = `<div class="state-box"><h3>${t('noArticles')}</h3><p>${t('noArticlesSub')}</p></div>`;
-      return;
+      } finally { busy = false; }
     }
-    const [hero, ...rest] = articles;
-    document.getElementById('heroArea').innerHTML = renderHero(hero);
-    document.getElementById('gridArea').innerHTML =
-      `<div class="news-grid" id="newsGrid">${rest.map(renderCard).join('')}</div>`;
-  }
 
-  function appendCards(articles) {
-    const grid = document.getElementById('newsGrid');
-    if (grid) grid.insertAdjacentHTML('beforeend', articles.map(renderCard).join(''));
-  }
+    function loadMore() {
+      page++;
+      const btn = document.getElementById('loadMoreBtn');
+      btn.disabled = true; btn.textContent = '…';
+      fetchNews(false).then(() => { btn.disabled = false; btn.textContent = t('loadMore'); });
+    }
 
-  // ── Hero ──────────────────────────────────────────────────────────────────────
-  function renderHero(a) {
-    const isBreaking = Date.now() - new Date(a.publishedAt) < 2 * 3_600_000;
-    const color = fallbackColor(a.source), letter = (a.source||'?')[0].toUpperCase();
-    const imgSrc  = a.urlToImage ? `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}` : null;
-    const imgHtml = imgSrc
-      ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=hero-img-fallback style=background:${color}>${letter}</div>'">`
-      : `<div class="hero-img-fallback" style="background:${color}">${letter}</div>`;
+    // ══════════════ RENDER ══════════════
+    function renderReset(articles) {
+      if (!articles?.length) {
+        document.getElementById('heroArea').innerHTML = '';
+        document.getElementById('gridArea').innerHTML = `<div class="state-box"><h3>${t('noArticles')}</h3><p>${t('noArticlesSub')}</p></div>`;
+        return;
+      }
+      const [hero, ...rest] = articles;
+      document.getElementById('heroArea').innerHTML = renderHero(hero);
+      document.getElementById('gridArea').innerHTML =
+        `<div class="news-grid" id="newsGrid">${rest.map(renderCard).join('')}</div>`;
+    }
 
-    const isMulti    = a.sources && a.sources.length > 1;
-    const sourcesJson = isMulti ? esc(JSON.stringify(a.sources)) : '';
-    const summaryBox = `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
-    const summaryBtn = `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
+    function appendCards(articles) {
+      const grid = document.getElementById('newsGrid');
+      if (grid) grid.insertAdjacentHTML('beforeend', articles.map(renderCard).join(''));
+    }
 
-    const sourceBlock = isMulti
-      ? `<div class="source-cluster">${a.sources.map(s =>
+    // ── Hero ──────────────────────────────────────────────────────────────────────
+    function renderHero(a) {
+      const isBreaking = Date.now() - new Date(a.publishedAt) < 2 * 3_600_000;
+      const color = fallbackColor(a.source), letter = (a.source || '?')[0].toUpperCase();
+      let imgSrc = null;
+      if (a.urlToImage) {
+        imgSrc = `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}`;
+      } else if (a.url) {
+        imgSrc = `/api/scrape-image?url=${encodeURIComponent(a.url)}`;
+      }
+
+      const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=hero-img-fallback style=background:${color}>${letter}</div>'">`
+        : `<div class="hero-img-fallback" style="background:${color}">${letter}</div>`;
+
+      const isMulti = a.sources && a.sources.length > 1;
+      const sourcesJson = isMulti ? esc(JSON.stringify(a.sources)) : '';
+      const summaryBox = `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
+      const summaryBtn = `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
+
+      const sourceBlock = isMulti
+        ? `<div class="source-cluster">${a.sources.map(s =>
           `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="source-pill">${esc(s.name)} ↗</a>`
         ).join('')}</div>`
-      : `<div class="hero-source">${esc(a.source)}</div>`;
+        : `<div class="hero-source">${esc(a.source)}</div>`;
 
-    const readBtn = isMulti
-      ? ''   // source pills already act as read links
-      : `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="read-btn">${t('readFullStory')}</a>`;
+      const readBtn = isMulti
+        ? ''   // source pills already act as read links
+        : `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="read-btn">${t('readFullStory')}</a>`;
 
-    const synthBtn = isMulti
-      ? `<button class="synth-btn" onclick="synthesizeTitle(this)">✨ ${t('synthesizeTitle')}</button>`
-      : '';
+      const synthBtn = isMulti
+        ? `<button class="synth-btn" onclick="synthesizeTitle(this)">✨ ${t('synthesizeTitle')}</button>`
+        : '';
 
-    return `
+      return `
       <div class="hero-card" data-id="${esc(a.id)}" data-url="${esc(a.url)}"
-           data-title="${esc(a.title)}" data-desc="${esc(a.description||'')}"
-           data-content="${esc((a.content||'').substring(0,500))}"
+           data-title="${esc(a.title)}" data-desc="${esc(a.description || '')}"
+           data-content="${esc((a.content || '').substring(0, 500))}"
            ${isMulti ? `data-sources="${sourcesJson}"` : ''}>
         <div class="hero-img-wrap">${imgHtml}<div class="hero-overlay"></div></div>
         <div class="hero-content">
@@ -875,39 +1964,45 @@
           </div>
         </div>
       </div>`;
-  }
+    }
 
-  // ── Card ──────────────────────────────────────────────────────────────────────
-  function renderCard(a) {
-    const color = fallbackColor(a.source), letter = (a.source||'?')[0].toUpperCase();
-    const imgSrc  = a.urlToImage ? `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}` : null;
-    const imgHtml = imgSrc
-      ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=card-img-fallback style=background:${color}>${letter}</div>'">`
-      : `<div class="card-img-fallback" style="background:${color}">${letter}</div>`;
+    // ── Card ──────────────────────────────────────────────────────────────────────
+    function renderCard(a) {
+      const color = fallbackColor(a.source), letter = (a.source || '?')[0].toUpperCase();
+      let imgSrc = null;
+      if (a.urlToImage) {
+        imgSrc = `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}`;
+      } else if (a.url) {
+        imgSrc = `/api/scrape-image?url=${encodeURIComponent(a.url)}`;
+      }
 
-    const isMulti     = a.sources && a.sources.length > 1;
-    const sourcesJson = isMulti ? esc(JSON.stringify(a.sources)) : '';
-    const summaryBox  = `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
-    const summaryBtn  = `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
+      const imgHtml = imgSrc
+        ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=card-img-fallback style=background:${color}>${letter}</div>'">`
+        : `<div class="card-img-fallback" style="background:${color}">${letter}</div>`;
 
-    const sourceCluster = isMulti
-      ? `<div class="source-cluster">${a.sources.map(s =>
+      const isMulti = a.sources && a.sources.length > 1;
+      const sourcesJson = isMulti ? esc(JSON.stringify(a.sources)) : '';
+      const summaryBox = `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
+      const summaryBtn = `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
+
+      const sourceCluster = isMulti
+        ? `<div class="source-cluster">${a.sources.map(s =>
           `<a href="${esc(s.url)}" target="_blank" rel="noopener" class="source-pill">${esc(s.name)} ↗</a>`
         ).join('')}</div>`
-      : '';
+        : '';
 
-    const synthBtn = isMulti
-      ? `<button class="synth-btn" onclick="synthesizeTitle(this)">✨ ${t('synthesizeTitle')}</button>`
-      : '';
+      const synthBtn = isMulti
+        ? `<button class="synth-btn" onclick="synthesizeTitle(this)">✨ ${t('synthesizeTitle')}</button>`
+        : '';
 
-    const footLink = isMulti
-      ? ''    // source pills already link to each original
-      : `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="card-link">${t('readMore')}</a>`;
+      const footLink = isMulti
+        ? ''    // source pills already link to each original
+        : `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="card-link">${t('readMore')}</a>`;
 
-    return `
+      return `
       <article class="news-card" data-id="${esc(a.id)}" data-url="${esc(a.url)}"
-        data-title="${esc(a.title)}" data-desc="${esc(a.description||'')}"
-        data-content="${esc((a.content||'').substring(0,500))}"
+        data-title="${esc(a.title)}" data-desc="${esc(a.description || '')}"
+        data-content="${esc((a.content || '').substring(0, 500))}"
         ${isMulti ? `data-sources="${sourcesJson}"` : ''}>
         <div class="card-img-wrap">
           ${imgHtml}
@@ -928,155 +2023,160 @@
           ${footLink}
         </div>
       </article>`;
-  }
-
-  // ══════════════ AI SUMMARY ══════════════
-  async function getAiSummary(btn) {
-    const card = btn.closest('.news-card, .hero-card');
-    const box  = card.querySelector('.ai-box');
-    const txt  = card.querySelector('.ai-text');
-    if (box.classList.contains('show')) return;
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spin"></span> ${t('summarising')}`;
-    try {
-      const res = await fetch('/api/summarize', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, url: card.dataset.url, lang: settings.translateTo || lang, sentences: settings.summaryLength }),
-      });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error||'Request failed'); }
-      const data = await res.json();
-      txt.textContent = data.summary;
-      box.classList.add('show');
-      btn.innerHTML = `${checkSvg(13)} ${t('summaryReady')}`;
-    } catch (err) {
-      btn.disabled = false;
-      btn.innerHTML = `${starSvg(13)} ${t('aiSummary')}`;
-      showToast(err.message, 'error');
     }
-  }
 
-  // ══════════════ SYNTHESIZE TITLE ══════════════
-  async function synthesizeTitle(btn) {
-    const card    = btn.closest('.news-card, .hero-card');
-    const sources = JSON.parse(card.dataset.sources || '[]');
-    btn.disabled  = true;
-    btn.innerHTML = `<span class="spin"></span> ${t('synthesizing')}`;
-    try {
-      const res = await fetch('/api/synthesize-title', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sources }),
-      });
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
-      card.querySelector('.card-title, .hero-title').textContent = data.title;
-      btn.remove();   // Remove button after successful synthesis
-    } catch {
-      btn.disabled  = false;
-      btn.innerHTML = `✨ ${t('synthesizeTitle')}`;
-      showToast('Synthesis failed', 'error');
-    }
-  }
+    // ══════════════ AI SUMMARY ══════════════
+    async function getAiSummary(btn) {
+      const card = btn.closest('.news-card, .hero-card');
+      const box = card.querySelector('.ai-box');
+      const txt = card.querySelector('.ai-text');
+      if (box.classList.contains('show')) return;
 
-  // ══════════════ TRANSLATION ══════════════
-  async function maybeTranslate(articles) {
-    if (!settings.translateTo || !articles.length) return;
-    if (settings.translateTo === lang) return;  // articles already in target language
-
-    showToast(t('translating'), 'info', 0);
-    try {
-      const res = await fetch('/api/translate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          articles:   articles.map(a => ({ id: a.id, title: a.title, description: a.description })),
-          targetLang: settings.translateTo,
-        }),
-      });
-      if (!res.ok) throw new Error('Translation request failed');
-      const data = await res.json();
-      updateCardsWithTranslations(data.translations);
-    } catch (err) {
-      showToast('Translation failed: ' + err.message, 'error');
-    } finally {
-      hideToast();
-    }
-  }
-
-  function updateCardsWithTranslations(translations) {
-    for (const [id, trans] of Object.entries(translations)) {
-      // Regular cards
-      const card = document.querySelector(`.news-card[data-id="${id}"]`);
-      if (card) {
-        const titleEl = card.querySelector('.card-title');
-        const descEl  = card.querySelector('.card-desc');
-        if (titleEl) titleEl.textContent = trans.title;
-        if (descEl)  descEl.textContent  = trans.description;
-        if (!card.querySelector('.trans-badge')) {
-          const badge = document.createElement('span');
-          badge.className = 'trans-badge';
-          badge.textContent = t('translatedBadge');
-          card.querySelector('.card-body').prepend(badge);
-        }
-      }
-      // Hero card
-      const hero = document.querySelector(`.hero-card[data-id="${id}"]`);
-      if (hero) {
-        const titleEl = hero.querySelector('.hero-title');
-        const descEl  = hero.querySelector('.hero-desc');
-        if (titleEl) titleEl.textContent = trans.title;
-        if (descEl)  descEl.textContent  = trans.description;
-        if (!hero.querySelector('.trans-badge')) {
-          const badge = document.createElement('span');
-          badge.className = 'trans-badge';
-          badge.textContent = t('translatedBadge');
-          hero.querySelector('.hero-content').insertBefore(badge, hero.querySelector('.hero-source'));
-        }
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spin"></span> ${t('summarising')}`;
+      try {
+        const res = await fetch('/api/summarize', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, url: card.dataset.url, lang: settings.translateTo || lang, sentences: settings.summaryLength }),
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Request failed'); }
+        const data = await res.json();
+        txt.textContent = data.summary;
+        box.classList.add('show');
+        btn.innerHTML = `${checkSvg(13)} ${t('summaryReady')}`;
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = `${starSvg(13)} ${t('aiSummary')}`;
+        showToast(err.message, 'error');
       }
     }
-  }
 
-  // Called when user turns translation OFF — restore original text from data attributes
-  function clearTranslations() {
-    document.querySelectorAll('[data-title][data-desc]').forEach(el => {
-      const titleEl = el.querySelector('.card-title, .hero-title');
-      const descEl  = el.querySelector('.card-desc,  .hero-desc');
-      if (titleEl) titleEl.textContent = el.dataset.title;
-      if (descEl)  descEl.textContent  = el.dataset.desc;
-      el.querySelector('.trans-badge')?.remove();
-    });
-  }
+    // ══════════════ SYNTHESIZE TITLE ══════════════
+    async function synthesizeTitle(btn) {
+      const card = btn.closest('.news-card, .hero-card');
+      const sources = JSON.parse(card.dataset.sources || '[]');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spin"></span> ${t('synthesizing')}`;
+      try {
+        const res = await fetch('/api/synthesize-title', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sources }),
+        });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        card.querySelector('.card-title, .hero-title').textContent = data.title;
+        btn.remove();   // Remove button after successful synthesis
+      } catch {
+        btn.disabled = false;
+        btn.innerHTML = `✨ ${t('synthesizeTitle')}`;
+        showToast('Synthesis failed', 'error');
+      }
+    }
 
-  // ══════════════ TOAST ══════════════
-  function showToast(msg, type = 'error', duration = 3500) {
-    let el = document.getElementById('_toast');
-    el.textContent = msg;
-    el.className = `toast ${type}`;
-    el.style.opacity = '1';
-    clearTimeout(el._tid);
-    if (duration > 0) el._tid = setTimeout(() => el.style.opacity = '0', duration);
-  }
-  function hideToast() {
-    const el = document.getElementById('_toast');
-    clearTimeout(el._tid); el.style.opacity = '0';
-  }
+    // ══════════════ TRANSLATION ══════════════
+    async function maybeTranslate(articles) {
+      if (!settings.translateTo || !articles.length) return;
+      if (settings.translateTo === lang) return;  // articles already in target language
 
-  // ══════════════ HELPERS ══════════════
-  function relTime(iso) {
-    const diff = Date.now() - new Date(iso);
-    const m = Math.floor(diff / 60_000), h = Math.floor(diff / 3_600_000);
-    if (m < 1)  return t('justNow');
-    if (m < 60) return `${m}m ago`;
-    if (h < 24) return `${h}h ago`;
-    return new Date(iso).toLocaleDateString(settings.uiLang === 'he' ? 'he-IL' : 'en-US', { month:'short', day:'numeric' });
-  }
-  function fallbackColor(src) { return FALLBACK_COLORS[(src||'').charCodeAt(0) % FALLBACK_COLORS.length]; }
-  function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-  function skelHtml(n) {
-    const c = `<div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:88%"></div><div class="skel-line" style="height:18px;width:68%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:82%"></div><div class="skel-line" style="height:13px;width:55%"></div></div></div>`;
-    return `<div class="skel-grid">${c.repeat(n)}</div>`;
-  }
-  function starSvg(s)  { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`; }
-  function checkSvg(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`; }
-</script>
+      showToast(t('translating'), 'info', 0);
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            articles: articles.map(a => ({ id: a.id, title: a.title, description: a.description })),
+            targetLang: settings.translateTo,
+          }),
+        });
+        if (!res.ok) throw new Error('Translation request failed');
+        const data = await res.json();
+        updateCardsWithTranslations(data.translations);
+      } catch (err) {
+        showToast('Translation failed: ' + err.message, 'error');
+      } finally {
+        hideToast();
+      }
+    }
+
+    function updateCardsWithTranslations(translations) {
+      for (const [id, trans] of Object.entries(translations)) {
+        // Regular cards
+        const card = document.querySelector(`.news-card[data-id="${id}"]`);
+        if (card) {
+          const titleEl = card.querySelector('.card-title');
+          const descEl = card.querySelector('.card-desc');
+          if (titleEl) titleEl.textContent = trans.title;
+          if (descEl) descEl.textContent = trans.description;
+          if (!card.querySelector('.trans-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'trans-badge';
+            badge.textContent = t('translatedBadge');
+            card.querySelector('.card-body').prepend(badge);
+          }
+        }
+        // Hero card
+        const hero = document.querySelector(`.hero-card[data-id="${id}"]`);
+        if (hero) {
+          const titleEl = hero.querySelector('.hero-title');
+          const descEl = hero.querySelector('.hero-desc');
+          if (titleEl) titleEl.textContent = trans.title;
+          if (descEl) descEl.textContent = trans.description;
+          if (!hero.querySelector('.trans-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'trans-badge';
+            badge.textContent = t('translatedBadge');
+            hero.querySelector('.hero-content').insertBefore(badge, hero.querySelector('.hero-source'));
+          }
+        }
+      }
+    }
+
+    // Called when user turns translation OFF — restore original text from data attributes
+    function clearTranslations() {
+      document.querySelectorAll('[data-title][data-desc]').forEach(el => {
+        const titleEl = el.querySelector('.card-title, .hero-title');
+        const descEl = el.querySelector('.card-desc,  .hero-desc');
+        if (titleEl) titleEl.textContent = el.dataset.title;
+        if (descEl) descEl.textContent = el.dataset.desc;
+        el.querySelector('.trans-badge')?.remove();
+      });
+    }
+
+    // ══════════════ TOAST ══════════════
+    function showToast(msg, type = 'error', duration = 3500) {
+      let el = document.getElementById('_toast');
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      el.style.opacity = '1';
+      clearTimeout(el._tid);
+      if (duration > 0) el._tid = setTimeout(() => el.style.opacity = '0', duration);
+    }
+    function hideToast() {
+      const el = document.getElementById('_toast');
+      clearTimeout(el._tid); el.style.opacity = '0';
+    }
+
+    // ══════════════ HELPERS ══════════════
+    function relTime(iso) {
+      if (!iso) return '';
+      const date = new Date(iso);
+      if (isNaN(date.getTime())) return '';
+      const diff = Date.now() - date.getTime();
+      const m = Math.floor(diff / 60_000), h = Math.floor(diff / 3_600_000);
+      const isHe = settings.uiLang === 'he';
+      if (m < 1) return t('justNow');
+      if (m < 60) return isHe ? `לפני ${m} דקות` : `${m}m ago`;
+      if (h < 24) return isHe ? `לפני ${h} שעות` : `${h}h ago`;
+      return date.toLocaleDateString(isHe ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
+    }
+    function fallbackColor(src) { return FALLBACK_COLORS[(src || '').charCodeAt(0) % FALLBACK_COLORS.length]; }
+    function esc(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+    function skelHtml(n) {
+      const c = `<div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="height:18px;width:88%"></div><div class="skel-line" style="height:18px;width:68%"></div><div class="skel-line" style="height:13px;width:100%;margin-top:4px"></div><div class="skel-line" style="height:13px;width:82%"></div><div class="skel-line" style="height:13px;width:55%"></div></div></div>`;
+      return `<div class="skel-grid">${c.repeat(n)}</div>`;
+    }
+    function starSvg(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`; }
+    function checkSvg(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`; }
+  </script>
 </body>
+
 </html>
