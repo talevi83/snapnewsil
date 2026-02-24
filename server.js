@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const axios   = require('axios');
+const cheerio = require('cheerio');
 const OpenAI  = require('openai');
 const Parser  = require('rss-parser');
 const path    = require('path');
@@ -145,6 +146,57 @@ app.get('/api/news', async (req, res) => {
   }
 });
 
+// ─── scrapeArticle helper ────────────────────────────────────────────────────
+async function scrapeArticle(url) {
+  if (!url) return null;
+  try {
+    const response = await axios.get(url, {
+      timeout: 8000,
+      headers: {
+        'User-Agent':      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept':          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+      },
+      maxRedirects: 5,
+    });
+    const $ = cheerio.load(response.data);
+
+    // Strip noise before extracting paragraphs
+    $('script, style, noscript, nav, header, footer, aside, ' +
+      '[class*="ad-"], [class*="ads-"], [id*="ad-"], [id*="ads-"], ' +
+      '[class*="social"], [class*="share"], [class*="comment"], ' +
+      '[class*="related"], [class*="sidebar"], [class*="newsletter"], [class*="subscribe"]'
+    ).remove();
+
+    // Selectors tried in priority order; pick first yielding >= 2 paragraphs > 40 chars
+    const SELECTORS = [
+      'article p',
+      '[class*="article-body"] p', '[class*="article-content"] p',
+      '[class*="article_body"] p', '[class*="article_content"] p',
+      '[class*="ArticleBody"] p',  '[class*="ArticleContent"] p',
+      '[class*="story-body"] p',   '[class*="story-content"] p',
+      '[class*="post-content"] p', '[class*="entry-content"] p',
+      'main p',
+    ];
+
+    const extract = sel =>
+      $(sel).map((_, el) => $(el).text().trim()).get().filter(t => t.length > 40);
+
+    let paragraphs = [];
+    for (const sel of SELECTORS) {
+      const found = extract(sel);
+      if (found.length >= 2) { paragraphs = found; break; }
+    }
+    if (paragraphs.length < 2) paragraphs = extract('p');   // final fallback
+    if (!paragraphs.length) return null;
+
+    return paragraphs.join('\n\n').substring(0, 4000);
+  } catch (err) {
+    console.warn(`scrapeArticle failed [${url}]:`, err.message);
+    return null;
+  }
+}
+
 // ─── POST /api/summarize ──────────────────────────────────────────────────────
 app.post('/api/summarize', async (req, res) => {
   if (!openai) {
@@ -153,12 +205,15 @@ app.post('/api/summarize', async (req, res) => {
     });
   }
 
-  const { id, title, description, content, lang = 'he', sentences = 3 } = req.body;
+  const { id, title, description, content, url, lang = 'he', sentences = 3 } = req.body;
   if (!title) return res.status(400).json({ error: 'title is required' });
 
-  const context = [title, description, content?.replace(/\[\+\d+ chars\]$/, '')]
-    .filter(Boolean)
-    .join('\n\n');
+  const scrapedText = await scrapeArticle(url);
+  const context = scrapedText && scrapedText.length > 100
+    ? scrapedText
+    : [title, description, content?.replace(/\[\+\d+ chars\]$/, '')]
+        .filter(Boolean)
+        .join('\n\n');
 
   const n = Math.min(10, Math.max(2, parseInt(sentences, 10) || 3));
   const systemPrompt = lang === 'he'
