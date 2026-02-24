@@ -217,8 +217,8 @@ app.post('/api/summarize', async (req, res) => {
 
   const n = Math.min(10, Math.max(2, parseInt(sentences, 10) || 3));
   const systemPrompt = lang === 'he'
-    ? `אתה מסכם חדשות. השב ב-${n} משפטים עובדתיים וניטרליים בעברית. אם אין מספיק תוכן, כתוב פחות לפי הצורך.`
-    : `You are a news summarizer. Respond with ${n} neutral, factual sentences in English. If there is not enough content, use fewer sentences as needed.`;
+    ? `אתה מסכם חדשות. השב ב-${n} משפטים עובדתיים וניטרליים בעברית ללא מספור. אם אין מספיק תוכן, כתוב פחות לפי הצורך.`
+    : `You are a news summarizer. Respond with ${n} neutral, factual sentences in English. Do not number the sentences. If there is not enough content, use fewer sentences as needed.`;
   const userPrompt = lang === 'he'
     ? `סכם את כתבת החדשות הבאה בעברית:\n\n${context}`
     : `Summarize this news article:\n\n${context}`;
