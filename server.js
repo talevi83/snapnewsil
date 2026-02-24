@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios   = require('axios');
 const OpenAI  = require('openai');
+const Parser  = require('rss-parser');
 const path    = require('path');
 const fs      = require('fs');
 
@@ -17,6 +18,75 @@ if (process.env.OPENAI_API_KEY) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+
+// ─── RSS setup ────────────────────────────────────────────────────────────────
+const rssParser = new Parser({
+  timeout: 8000,
+  headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SnapNewsIL/1.0)' },
+  customFields: { item: [['media:content', 'mediaContent'], ['media:thumbnail', 'mediaThumbnail']] },
+});
+
+const RSS_FEEDS = [
+  { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',       name: 'Ynet'      },
+  { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'     },
+  { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'       },
+  { url: 'https://www.calcalist.co.il/GeneralRSS.aspx',             name: 'Calcalist' },
+  { url: 'https://www.globes.co.il/CommonFiles/Rss/RssGlobes.aspx', name: 'Globes'    },
+];
+
+function normalizeRssItem(item, feedName) {
+  const image =
+    item.enclosure?.url       ||
+    item.mediaContent?.$.url  ||
+    item.mediaThumbnail?.$.url ||
+    null;
+  return {
+    title:       (item.title || '').trim(),
+    description: (item.contentSnippet || item.summary || '').substring(0, 300),
+    content:     item.content || '',
+    url:         item.link || item.url || '',
+    urlToImage:  image,
+    publishedAt: item.isoDate || item.pubDate || new Date().toISOString(),
+    source:      feedName,
+  };
+}
+
+// Jaccard similarity on words ≥ 3 chars (Hebrew + English)
+function titleSimilarity(t1, t2) {
+  const words = s => new Set(
+    s.toLowerCase().replace(/[^\u0590-\u05FFa-z0-9\s]/g, '').split(/\s+/).filter(w => w.length >= 3)
+  );
+  const w1 = words(t1), w2 = words(t2);
+  if (!w1.size || !w2.size) return 0;
+  const common = [...w1].filter(w => w2.has(w)).length;
+  return common / Math.max(w1.size, w2.size);
+}
+
+// Group articles that cover the same story (similar title within 12h)
+function groupByStory(articles) {
+  const groups = [], used = new Set();
+  for (let i = 0; i < articles.length; i++) {
+    if (used.has(i)) continue;
+    const primary = articles[i];
+    const sources = [{ name: primary.source, url: primary.url, title: primary.title }];
+    used.add(i);
+    for (let j = i + 1; j < articles.length; j++) {
+      if (used.has(j)) continue;
+      const timeDiff = Math.abs(new Date(primary.publishedAt) - new Date(articles[j].publishedAt));
+      if (timeDiff > 12 * 3_600_000) continue;                            // 12h window
+      if (titleSimilarity(primary.title, articles[j].title) < 0.35) continue;
+      sources.push({ name: articles[j].source, url: articles[j].url, title: articles[j].title });
+      used.add(j);
+    }
+    // Prefer an article with an image as the display primary
+    const bestImage = sources
+      .map(s => articles.find(a => a.url === s.url))
+      .find(a => a?.urlToImage)?.urlToImage || primary.urlToImage;
+
+    groups.push({ ...primary, urlToImage: bestImage, sources });
+  }
+  return groups;
+}
 
 // Israeli domains to exclude when showing international coverage
 const ISRAELI_DOMAINS = [
@@ -198,6 +268,64 @@ app.post('/api/save-key', (req, res) => {
   openai = new OpenAI({ apiKey: key });
 
   res.json({ success: true });
+});
+
+// ─── GET /api/rss ─────────────────────────────────────────────────────────────
+app.get('/api/rss', async (req, res) => {
+  const { page = 1 } = req.query;
+  const PAGE_SIZE = 12;
+  try {
+    const results = await Promise.allSettled(
+      RSS_FEEDS.map(f =>
+        rssParser.parseURL(f.url).then(feed =>
+          feed.items.map(item => normalizeRssItem(item, f.name))
+        )
+      )
+    );
+    let articles = [];
+    results.forEach(r => { if (r.status === 'fulfilled') articles.push(...r.value); });
+    articles = articles
+      .filter(a => a.title && a.url)
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+    const groups  = groupByStory(articles);
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const paged   = groups
+      .slice((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE)
+      .map((g, i) => ({ ...g, id: `rss-p${pageNum}-${i}` }));
+
+    res.json({ articles: paged, totalResults: groups.length, pageSize: PAGE_SIZE });
+  } catch (err) {
+    console.error('RSS error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/synthesize-title ───────────────────────────────────────────────
+app.post('/api/synthesize-title', async (req, res) => {
+  if (!openai) return res.status(503).json({ error: 'OpenAI not configured' });
+  const { sources } = req.body;   // [{name, title}]
+  if (!Array.isArray(sources) || sources.length < 2)
+    return res.status(400).json({ error: 'Need at least 2 sources' });
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o', max_tokens: 60,
+      messages: [
+        {
+          role: 'system',
+          content: 'אתה עורך חדשות. כתוב כותרת ניטרלית ותמציתית בעברית (עד 12 מילים) שמסכמת את הידיעה על פי הכותרות הבאות ממקורות שונים. עובדות בלבד, ללא פרשנות.',
+        },
+        {
+          role: 'user',
+          content: sources.map(s => `${s.name}: ${s.title}`).join('\n'),
+        },
+      ],
+    });
+    res.json({ title: completion.choices[0].message.content.trim() });
+  } catch (err) {
+    console.error('Synthesize error:', err.message);
+    res.status(500).json({ error: 'Synthesis failed' });
+  }
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
