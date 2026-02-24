@@ -829,8 +829,9 @@
   function renderHero(a) {
     const isBreaking = Date.now() - new Date(a.publishedAt) < 2 * 3_600_000;
     const color = fallbackColor(a.source), letter = (a.source||'?')[0].toUpperCase();
-    const imgHtml = a.urlToImage
-      ? `<img src="${esc(a.urlToImage)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=hero-img-fallback style=background:${color}>${letter}</div>'">`
+    const imgSrc  = a.urlToImage ? `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}` : null;
+    const imgHtml = imgSrc
+      ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=hero-img-fallback style=background:${color}>${letter}</div>'">`
       : `<div class="hero-img-fallback" style="background:${color}">${letter}</div>`;
 
     const isMulti    = a.sources && a.sources.length > 1;
@@ -879,8 +880,9 @@
   // ── Card ──────────────────────────────────────────────────────────────────────
   function renderCard(a) {
     const color = fallbackColor(a.source), letter = (a.source||'?')[0].toUpperCase();
-    const imgHtml = a.urlToImage
-      ? `<img src="${esc(a.urlToImage)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=card-img-fallback style=background:${color}>${letter}</div>'">`
+    const imgSrc  = a.urlToImage ? `/api/img-proxy?url=${encodeURIComponent(a.urlToImage)}` : null;
+    const imgHtml = imgSrc
+      ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.outerHTML='<div class=card-img-fallback style=background:${color}>${letter}</div>'">`
       : `<div class="card-img-fallback" style="background:${color}">${letter}</div>`;
 
     const isMulti     = a.sources && a.sources.length > 1;

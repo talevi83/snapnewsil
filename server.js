@@ -389,6 +389,35 @@ app.post('/api/save-key', (req, res) => {
   res.json({ success: true });
 });
 
+// ─── GET /api/img-proxy ───────────────────────────────────────────────────────
+// Fetches remote images server-side, bypassing hotlink / Referer checks on news sites.
+app.get('/api/img-proxy', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).send('Missing url');
+  let parsed;
+  try { parsed = new URL(url); } catch { return res.status(400).send('Invalid url'); }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return res.status(400).send('Bad protocol');
+
+  try {
+    const response = await axios.get(url, {
+      responseType: 'stream',
+      timeout: 8000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept':     'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Referer':    `${parsed.protocol}//${parsed.host}/`,   // appear to come from the image's own site
+      },
+    });
+    const ct = response.headers['content-type'] || 'image/jpeg';
+    if (!ct.startsWith('image/')) return res.status(415).send('Not an image');
+    res.setHeader('Content-Type', ct);
+    res.setHeader('Cache-Control', 'public, max-age=86400');   // cache 24 h in browser
+    response.data.pipe(res);
+  } catch (err) {
+    res.status(502).send('Could not fetch image');
+  }
+});
+
 // ─── GET /api/rss ─────────────────────────────────────────────────────────────
 app.get('/api/rss', async (req, res) => {
   const { page = 1, category = 'all' } = req.query;
