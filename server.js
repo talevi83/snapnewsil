@@ -3,6 +3,7 @@ const express = require('express');
 const axios   = require('axios');
 const OpenAI  = require('openai');
 const path    = require('path');
+const fs      = require('fs');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -13,9 +14,6 @@ if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-// Simple in-memory cache so repeated clicks don't re-call the API
-const summaryCache     = new Map();
-const translationCache = new Map();
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -55,12 +53,8 @@ app.get('/api/news', async (req, res) => {
 
     const response = await axios.get('https://newsapi.org/v2/everything', { params });
 
-    const israelTerms = /ישראל|ישראלי|ישראלים/;
-
     const articles = response.data.articles
       .filter(a => a.title && a.title !== '[Removed]' && a.description)
-      // For Hebrew tabs only: ensure Israel is mentioned in title or description
-      .filter(a => international === 'true' || israelTerms.test(`${a.title} ${a.description}`))
       .map((a, i) => ({
         id:          `p${page}-${i}`,
         title:       a.title,
@@ -92,10 +86,6 @@ app.post('/api/summarize', async (req, res) => {
   const { id, title, description, content, lang = 'he' } = req.body;
   if (!title) return res.status(400).json({ error: 'title is required' });
 
-  if (summaryCache.has(id)) {
-    return res.json({ summary: summaryCache.get(id), cached: true });
-  }
-
   const context = [title, description, content?.replace(/\[\+\d+ chars\]$/, '')]
     .filter(Boolean)
     .join('\n\n');
@@ -118,7 +108,6 @@ app.post('/api/summarize', async (req, res) => {
     });
 
     const summary = completion.choices[0].message.content;
-    summaryCache.set(id, summary);
     res.json({ summary });
   } catch (err) {
     console.error('OpenAI error:', err.message);
@@ -143,53 +132,72 @@ app.post('/api/translate', async (req, res) => {
   };
   const targetName = LANG_NAMES[targetLang] || targetLang;
 
-  // Separate already-cached articles from ones that need translation
-  const results    = {};
-  const toTranslate = [];
-  for (const a of articles) {
-    const key = `${a.id}::${targetLang}`;
-    if (translationCache.has(key)) {
-      results[a.id] = translationCache.get(key);
-    } else {
-      toTranslate.push(a);
-    }
-  }
-
-  if (toTranslate.length > 0) {
-    try {
-      const completion = await openai.chat.completions.create({
-        model:           'gpt-4o',
-        max_tokens:      4000,
-        response_format: { type: 'json_object' },
-        messages: [
-          {
-            role:    'system',
-            content: `You are a professional news translator. Translate article titles and descriptions to ${targetName}.
+  try {
+    const completion = await openai.chat.completions.create({
+      model:           'gpt-4o',
+      max_tokens:      4000,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role:    'system',
+          content: `You are a professional news translator. Translate article titles and descriptions to ${targetName}.
 Return JSON: {"translations":[{"id":"...","title":"...","description":"..."},...]}
 Keep the same order and IDs. Preserve proper nouns where culturally appropriate.`,
-          },
-          {
-            role:    'user',
-            content: JSON.stringify(
-              toTranslate.map(a => ({ id: a.id, title: a.title, description: a.description || '' }))
-            ),
-          },
-        ],
-      });
+        },
+        {
+          role:    'user',
+          content: JSON.stringify(
+            articles.map(a => ({ id: a.id, title: a.title, description: a.description || '' }))
+          ),
+        },
+      ],
+    });
 
-      const parsed = JSON.parse(completion.choices[0].message.content);
-      for (const t of parsed.translations) {
-        const key = `${t.id}::${targetLang}`;
-        translationCache.set(key, { title: t.title, description: t.description });
-        results[t.id] = { title: t.title, description: t.description };
-      }
-    } catch (err) {
-      console.error('Translation error:', err.message);
-      return res.status(500).json({ error: 'Translation failed' });
+    const parsed = JSON.parse(completion.choices[0].message.content);
+    const results = {};
+    for (const t of parsed.translations) {
+      results[t.id] = { title: t.title, description: t.description };
     }
+    res.json({ translations: results });
+  } catch (err) {
+    console.error('Translation error:', err.message);
+    return res.status(500).json({ error: 'Translation failed' });
+  }
+});
+
+// ─── GET /api/config-status ───────────────────────────────────────────────────
+app.get('/api/config-status', (req, res) => {
+  res.json({ openaiKeySet: !!openai });
+});
+
+// ─── POST /api/save-key ───────────────────────────────────────────────────────
+app.post('/api/save-key', (req, res) => {
+  const { key } = req.body;
+  if (!key || !key.startsWith('sk-')) {
+    return res.status(400).json({ error: 'Invalid key — must start with sk-' });
   }
 
-  res.json({ translations: results });
+  const envPath = path.join(__dirname, '.env');
+  let envContent = '';
+  try { envContent = fs.readFileSync(envPath, 'utf8'); } catch (_) { /* file may not exist */ }
+
+  if (/^OPENAI_API_KEY=/m.test(envContent)) {
+    envContent = envContent.replace(/^OPENAI_API_KEY=.*/m, `OPENAI_API_KEY=${key}`);
+  } else {
+    envContent = envContent.trimEnd() + `\nOPENAI_API_KEY=${key}\n`;
+  }
+
+  try {
+    fs.writeFileSync(envPath, envContent, 'utf8');
+  } catch (err) {
+    return res.status(500).json({ error: 'Could not write .env file: ' + err.message });
+  }
+
+  // Apply immediately — no restart needed
+  process.env.OPENAI_API_KEY = key;
+  openai = new OpenAI({ apiKey: key });
+
+  res.json({ success: true });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Israel News — Live Updates</title>
+  <title>SnapNews IL — Live Updates</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Inter:wght@300;400;500;600&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Inter:wght@300;400;500;600&family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600;700&family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,6 +25,7 @@
       --gold:       #f5a524;
       --radius:     14px;
       --ease:       0.25s ease;
+      --article-font: 'Heebo','Inter',system-ui,sans-serif;
       --header-bg:  linear-gradient(160deg,#0d1628 0%,#0c0f22 60%,#0b0b18 100%);
       --shadow:     0 8px 32px rgba(0,0,0,.38);
     }
@@ -134,6 +135,7 @@
     .news-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
 
     /* ══════════════ NEWS CARD ══════════════ */
+    .news-card, .hero-article { font-family: var(--article-font); }
     .news-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; display:flex; flex-direction:column; transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease); }
     .news-card:hover { border-color:rgba(79,134,247,.25); box-shadow:var(--shadow),0 0 0 1px rgba(79,134,247,.07); transform:translateY(-3px); }
     .card-img-wrap { position:relative; aspect-ratio:16/9; overflow:hidden; }
@@ -249,16 +251,21 @@
 
     .settings-hint { font-size:.76rem; color:var(--muted); margin-top:.5rem; line-height:1.5; }
 
-    .clear-cache-btn {
-      display: inline-flex; align-items: center; gap: 7px;
-      width: 100%; padding: 9px 14px;
-      background: transparent; border: 1px solid var(--border);
-      border-radius: 8px; color: var(--muted);
-      font-size: .83rem; font-weight: 500; cursor: pointer;
-      transition: all var(--ease); font-family: inherit; justify-content: center;
-    }
-    .clear-cache-btn:hover { border-color: var(--red); color: var(--red); background: rgba(240,75,98,.07); }
-    .clear-cache-btn.done  { border-color: #10b981; color: #10b981; }
+    /* ══════════════ API KEY MODAL ══════════════ */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(5px); z-index:3000; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .modal-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem 2rem 1.75rem; max-width:440px; width:100%; box-shadow:var(--shadow); text-align:center; }
+    .modal-icon { font-size:2.25rem; margin-bottom:.85rem; }
+    .modal-title { font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:.6rem; }
+    .modal-desc { font-size:.85rem; color:var(--muted); line-height:1.65; margin-bottom:1.25rem; }
+    .modal-input { width:100%; padding:.65rem .85rem; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.88rem; font-family:monospace; margin-bottom:.4rem; outline:none; transition:border-color var(--ease); }
+    .modal-input:focus { border-color:var(--blue); }
+    .modal-error { font-size:.8rem; color:var(--red); min-height:1.1em; margin-bottom:.85rem; }
+    .modal-save-btn { width:100%; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:.7rem 1.25rem; font-size:.9rem; font-weight:600; cursor:pointer; transition:opacity var(--ease); margin-bottom:.5rem; }
+    .modal-save-btn:hover:not(:disabled) { opacity:.88; }
+    .modal-save-btn:disabled { opacity:.5; cursor:default; }
+    .modal-skip-btn { background:none; border:none; color:var(--muted); font-size:.82rem; cursor:pointer; text-decoration:underline; }
+    .modal-skip-btn:hover { color:var(--text); }
+    .modal-hint { font-size:.74rem; color:var(--dim); margin-top:1.1rem; }
 
     /* ══════════════ TOAST ══════════════ */
     .toast {
@@ -269,10 +276,12 @@
       opacity: 0; transition: opacity .3s;
       white-space: nowrap;
     }
-    .toast.error { background:#1e1e30; border:1px solid rgba(240,75,98,.35); color:var(--red); }
-    .toast.info  { background:#1a2440; border:1px solid rgba(79,134,247,.35); color:var(--blue); }
-    [data-theme="light"] .toast.error { background:#fff; }
-    [data-theme="light"] .toast.info  { background:#fff; }
+    .toast.error   { background:#1e1e30; border:1px solid rgba(240,75,98,.35); color:var(--red); }
+    .toast.info    { background:#1a2440; border:1px solid rgba(79,134,247,.35); color:var(--blue); }
+    .toast.success { background:#0f2318; border:1px solid rgba(16,185,129,.35); color:#10b981; }
+    [data-theme="light"] .toast.error   { background:#fff; }
+    [data-theme="light"] .toast.info    { background:#fff; }
+    [data-theme="light"] .toast.success { background:#fff; }
 
     /* ══════════════ FOOTER ══════════════ */
     footer { border-top:1px solid var(--border); padding:2rem; text-align:center; color:var(--dim); font-size:.78rem; }
@@ -310,13 +319,12 @@
         <div class="flag-stripe"></div>
       </div>
       <div class="logo-text">
-        <span class="logo-title">Israel News</span>
+        <span class="logo-title">SnapNews IL</span>
         <span class="logo-sub" data-i18n="liveUpdates">Live Updates</span>
       </div>
     </a>
     <div class="header-right">
-      <div class="live-pill"><div class="live-dot"></div>Live</div>
-      <div class="header-date" id="headerDate"></div>
+<div class="header-date" id="headerDate"></div>
       <button class="settings-btn" id="settingsBtn" onclick="openSettings()" aria-label="Settings">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/>
@@ -330,13 +338,14 @@
 <!-- ══════════════ CATEGORY BAR ══════════════ -->
 <div class="cat-bar">
   <div class="cat-inner" id="catInner">
-    <button class="cat-btn active" data-q="ישראל"                    data-lang="he" data-i18n="allNews">All News</button>
-    <button class="cat-btn"        data-q="ישראל פוליטיקה ממשלה"     data-lang="he" data-i18n="politics">Politics</button>
-    <button class="cat-btn"        data-q="ישראל ביטחון צבא"         data-lang="he" data-i18n="security">Security</button>
-    <button class="cat-btn"        data-q="ישראל כלכלה פיננסים"      data-lang="he" data-i18n="economy">Economy</button>
-    <button class="cat-btn"        data-q="ישראל דיפלומטיה יחסי חוץ" data-lang="he" data-i18n="diplomacy">Diplomacy</button>
-    <button class="cat-btn"        data-q="ישראל חברה תרבות"         data-lang="he" data-i18n="society">Society</button>
-    <button class="cat-btn"        data-q="ישראל טכנולוגיה סטארטאפ" data-lang="he" data-i18n="technology">Technology</button>
+    <button class="cat-btn active" data-q="ישראל"       data-lang="he" data-i18n="allNews">All News</button>
+    <button class="cat-btn"        data-q="פוליטיקה"   data-lang="he" data-i18n="politics">Politics</button>
+    <button class="cat-btn"        data-q="ביטחון"     data-lang="he" data-i18n="security">Security</button>
+    <button class="cat-btn"        data-q="שוק"         data-lang="he" data-i18n="economy">Economy</button>
+    <button class="cat-btn"        data-q="דיפלומטיה"  data-lang="he" data-i18n="diplomacy">Diplomacy</button>
+    <button class="cat-btn"        data-q="חברה"        data-lang="he" data-i18n="society">Society</button>
+    <button class="cat-btn"        data-q="טכנולוגיה"  data-lang="he" data-i18n="technology">Technology</button>
+    <button class="cat-btn"        data-q="AI"          data-lang="he" data-i18n="aiNews">🤖 AI</button>
     <div class="cat-divider"></div>
     <button class="cat-btn cat-btn--world" data-q="Israel" data-lang="en" data-international="true" data-i18n="worldView">🌍 World View</button>
   </div>
@@ -400,6 +409,17 @@
       </div>
     </div>
 
+    <!-- Article Font -->
+    <div class="settings-section">
+      <label data-i18n="articleFont">Article Font</label>
+      <div class="opt-pills">
+        <button class="opt-pill" id="pill-font-heebo"     onclick="setFont('heebo')"     data-i18n="fontHeebo"     style="font-family:'Heebo',sans-serif">Heebo</button>
+        <button class="opt-pill" id="pill-font-rubik"     onclick="setFont('rubik')"     data-i18n="fontRubik"     style="font-family:'Rubik',sans-serif">Rubik</button>
+        <button class="opt-pill" id="pill-font-frankruhl" onclick="setFont('frankruhl')" data-i18n="fontFrankRuhl" style="font-family:'Frank Ruhl Libre',serif">Frank Ruhl</button>
+        <button class="opt-pill" id="pill-font-assistant" onclick="setFont('assistant')" data-i18n="fontAssistant" style="font-family:'Assistant',sans-serif">Assistant</button>
+      </div>
+    </div>
+
     <!-- Article Translation -->
     <div class="settings-section">
       <label data-i18n="translateArticles">Translate Articles</label>
@@ -416,16 +436,20 @@
       <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded articles.</p>
     </div>
 
-    <!-- Clear Cache -->
-    <div class="settings-section">
-      <label data-i18n="cacheLabel">Local Cache</label>
-      <button class="clear-cache-btn" id="clearCacheBtn" onclick="clearCache()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-        <span data-i18n="clearCache">Clear Cache</span>
-      </button>
-      <p class="settings-hint" id="cacheHint"></p>
-    </div>
+  </div>
+</div>
 
+<!-- API Key Modal -->
+<div class="modal-overlay" id="apiKeyModal" style="display:none">
+  <div class="modal-card">
+    <div class="modal-icon">🔑</div>
+    <h2 class="modal-title">OpenAI API Key Required</h2>
+    <p class="modal-desc">AI summaries and article translation use GPT-4o and require an OpenAI API key. Enter your key below — it will be saved in the server's <code>.env</code> file.</p>
+    <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." autocomplete="off" spellcheck="false" />
+    <p class="modal-error" id="apiKeyError"></p>
+    <button class="modal-save-btn" id="apiKeySaveBtn" onclick="saveApiKey()">Save Key</button>
+    <button class="modal-skip-btn" onclick="closeApiKeyModal()">Skip — disable AI features</button>
+    <p class="modal-hint">Your key is stored only on this server and never sent elsewhere.</p>
   </div>
 </div>
 
@@ -433,53 +457,6 @@
 <div class="toast" id="_toast"></div>
 
 <script>
-  // ══════════════ LOCALSTORAGE CACHE (24h TTL) ══════════════
-  const LS_KEY = 'israel-news-cache';
-  const LS_TTL = 24 * 60 * 60 * 1000;
-
-  function loadCache() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return initCache();
-      const c = JSON.parse(raw);
-      if (Date.now() - c.createdAt > LS_TTL) { localStorage.removeItem(LS_KEY); return initCache(); }
-      return c;
-    } catch { return initCache(); }
-  }
-  function initCache() {
-    const c = { createdAt: Date.now(), summaries: {}, translations: {} };
-    saveCache(c); return c;
-  }
-  function saveCache(c) { try { localStorage.setItem(LS_KEY, JSON.stringify(c)); } catch {} }
-
-  function getCachedSummary(url)           { return lsCache.summaries[url] || null; }
-  function setCachedSummary(url, text)     { lsCache.summaries[url] = text; saveCache(lsCache); }
-  function getCachedTranslation(url, lang) { return lang ? (lsCache.translations[`${url}::${lang}`] || null) : null; }
-  function setCachedTranslation(url, lang, data) { lsCache.translations[`${url}::${lang}`] = data; saveCache(lsCache); }
-
-  let lsCache = loadCache();
-
-  function clearCache() {
-    lsCache = initCache();
-    const btn = document.getElementById('clearCacheBtn');
-    btn.classList.add('done');
-    btn.querySelector('span').textContent = t('cacheCleared');
-    setTimeout(() => {
-      btn.classList.remove('done');
-      btn.querySelector('span').textContent = t('clearCache');
-      updateCacheHint();
-    }, 2000);
-  }
-
-  function updateCacheHint() {
-    const hint = document.getElementById('cacheHint');
-    if (!hint) return;
-    const s = Object.keys(lsCache.summaries).length;
-    const tr = Object.keys(lsCache.translations).length;
-    const fn = I18N[settings.uiLang]?.cacheSize || I18N.en.cacheSize;
-    hint.textContent = fn(s, tr);
-  }
-
   // ══════════════ I18N ══════════════
   const I18N = {
     en: {
@@ -493,6 +470,7 @@
       society:          'Society',
       technology:       'Technology',
       worldView:        '🌍 World View',
+      aiNews:           '🤖 AI',
       loadMore:         'Load More Stories',
       aiSummary:        'AI Summary',
       aiSummaryLabel:   'AI Summary',
@@ -517,10 +495,11 @@
       couldNotLoad:     'Could not load news',
       footerLine1:      null, // HTML – skip
       footerLine2:      'Updated in real time · Summaries and translations are AI-generated',
-      cacheLabel:       'Local Cache',
-      clearCache:       'Clear Cache',
-      cacheCleared:     'Cache cleared',
-      cacheSize:        (s, t) => `${s} summaries · ${t} translations stored`,
+      articleFont:      'Article Font',
+      fontHeebo:        'Heebo',
+      fontRubik:        'Rubik',
+      fontFrankRuhl:    'Frank Ruhl',
+      fontAssistant:    'Assistant',
     },
     he: {
       liveUpdates:      'עדכונים חיים',
@@ -557,10 +536,11 @@
       couldNotLoad:     'לא ניתן לטעון חדשות',
       footerLine1:      null,
       footerLine2:      'מתעדכן בזמן אמת · סיכומים ותרגומים נוצרים ע"י AI',
-      cacheLabel:       'מטמון מקומי',
-      clearCache:       'נקה מטמון',
-      cacheCleared:     'המטמון נוקה',
-      cacheSize:        (s, t) => `${s} סיכומים · ${t} תרגומים שמורים`,
+      articleFont:      'גופן כתבות',
+      fontHeebo:        'הבו',
+      fontRubik:        'רוביק',
+      fontFrankRuhl:    'פרנק רוהל',
+      fontAssistant:    'אסיסטנט',
     },
   };
 
@@ -573,7 +553,24 @@
     theme:       localStorage.getItem('news-theme')        || 'dark',
     uiLang:      localStorage.getItem('news-ui-lang')      || 'en',
     translateTo: localStorage.getItem('news-translate-to') || '',
+    font:        localStorage.getItem('news-font')         || 'heebo',
   };
+
+  const FONT_FAMILIES = {
+    heebo:     "'Heebo','Inter',system-ui,sans-serif",
+    rubik:     "'Rubik','Inter',system-ui,sans-serif",
+    frankruhl: "'Frank Ruhl Libre',Georgia,serif",
+    assistant: "'Assistant','Inter',system-ui,sans-serif",
+  };
+
+  function setFont(font) {
+    settings.font = font;
+    localStorage.setItem('news-font', font);
+    document.documentElement.style.setProperty('--article-font', FONT_FAMILIES[font]);
+    ['heebo', 'rubik', 'frankruhl', 'assistant'].forEach(f => {
+      document.getElementById(`pill-font-${f}`)?.classList.toggle('active', f === font);
+    });
+  }
 
   function setTheme(theme) {
     settings.theme = theme;
@@ -606,6 +603,7 @@
   function applySettings() {
     setTheme(settings.theme);
     setUiLang(settings.uiLang);
+    setFont(settings.font);
     document.getElementById('translateSelect').value = settings.translateTo;
   }
 
@@ -621,7 +619,6 @@
   function openSettings() {
     document.getElementById('settingsPanel') .classList.add('open');
     document.getElementById('settingsOverlay').classList.add('open');
-    updateCacheHint();
   }
   function closeSettings() {
     document.getElementById('settingsPanel') .classList.remove('open');
@@ -638,6 +635,55 @@
   let busy          = false;
   let more          = true;
   let currentArticles = [];   // accumulates across pages for batch translate
+
+  // ══════════════ API KEY MODAL ══════════════
+  async function checkApiKey() {
+    try {
+      const res  = await fetch('/api/config-status');
+      const data = await res.json();
+      if (!data.openaiKeySet) {
+        document.getElementById('apiKeyModal').style.display = 'flex';
+      }
+    } catch (_) { /* server unreachable — skip silently */ }
+  }
+
+  function closeApiKeyModal() {
+    document.getElementById('apiKeyModal').style.display = 'none';
+  }
+
+  async function saveApiKey() {
+    const key   = document.getElementById('apiKeyInput').value.trim();
+    const errEl = document.getElementById('apiKeyError');
+    const btn   = document.getElementById('apiKeySaveBtn');
+    errEl.textContent = '';
+
+    if (!key.startsWith('sk-')) {
+      errEl.textContent = 'Key must start with sk-';
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Saving…';
+    try {
+      const res = await fetch('/api/save-key', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ key }),
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
+      closeApiKeyModal();
+      showToast('OpenAI API key saved — AI features enabled', 'success');
+    } catch (e) {
+      errEl.textContent   = e.message;
+      btn.disabled        = false;
+      btn.textContent     = 'Save Key';
+    }
+  }
+
+  // Allow Enter key to submit the modal
+  document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveApiKey();
+  });
 
   // ══════════════ BOOT ══════════════
   applySettings();
@@ -662,6 +708,7 @@
   });
 
   fetchNews(true);
+  checkApiKey();
 
   // ══════════════ FETCH ══════════════
   async function fetchNews(reset) {
@@ -719,23 +766,15 @@
       ? `<img src="${esc(a.urlToImage)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=hero-img-fallback style=background:${color}>${letter}</div>'">`
       : `<div class="hero-img-fallback" style="background:${color}">${letter}</div>`;
 
-    // Apply cached translation at render-time — only when articles differ from target language
-    const needsTranslation = settings.translateTo && settings.translateTo !== lang;
-    const cached     = needsTranslation ? getCachedTranslation(a.url, settings.translateTo) : null;
-    const title      = cached ? cached.title       : a.title;
-    const desc       = cached ? cached.description : (a.description || '');
-    const translated = !!cached;
-
     return `
       <div class="hero-card" data-id="${esc(a.id)}" data-url="${esc(a.url)}"
            data-title="${esc(a.title)}" data-desc="${esc(a.description||'')}">
         <div class="hero-img-wrap">${imgHtml}<div class="hero-overlay"></div></div>
         <div class="hero-content">
-          ${translated ? `<span class="trans-badge">${t('translatedBadge')}</span>` : ''}
           ${isBreaking ? `<div class="breaking-badge">${t('breaking')}</div>` : ''}
           <div class="hero-source">${esc(a.source)}</div>
-          <a href="${esc(a.url)}" target="_blank" rel="noopener" class="hero-title" dir="auto">${esc(title)}</a>
-          <p class="hero-desc" dir="auto">${esc(desc)}</p>
+          <a href="${esc(a.url)}" target="_blank" rel="noopener" class="hero-title" dir="auto">${esc(a.title)}</a>
+          <p class="hero-desc" dir="auto">${esc(a.description || '')}</p>
           <div class="hero-footer">
             <span class="hero-time">${relTime(a.publishedAt)}</span>
             <a href="${esc(a.url)}" target="_blank" rel="noopener" class="read-btn">${t('readFullStory')}</a>
@@ -751,21 +790,8 @@
       ? `<img src="${esc(a.urlToImage)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=card-img-fallback style=background:${color}>${letter}</div>'">`
       : `<div class="card-img-fallback" style="background:${color}">${letter}</div>`;
 
-    // Apply cached translation at render-time — only when articles differ from target language
-    const needsTranslation = settings.translateTo && settings.translateTo !== lang;
-    const cached     = needsTranslation ? getCachedTranslation(a.url, settings.translateTo) : null;
-    const title      = cached ? cached.title       : a.title;
-    const desc       = cached ? cached.description : (a.description || '');
-    const translated = !!cached;
-
-    // Pre-populate AI summary box if cached
-    const cachedSummary = getCachedSummary(a.url);
-    const summaryBox = cachedSummary
-      ? `<div class="ai-box show"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto">${esc(cachedSummary)}</p></div>`
-      : `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
-    const summaryBtn = cachedSummary
-      ? `<button class="ai-btn" onclick="getAiSummary(this)" disabled>${checkSvg(13)} ${t('summaryReady')}</button>`
-      : `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
+    const summaryBox = `<div class="ai-box"><div class="ai-label">${starSvg(11)} ${t('aiSummaryLabel')}</div><p class="ai-text" dir="auto"></p></div>`;
+    const summaryBtn = `<button class="ai-btn" onclick="getAiSummary(this)">${starSvg(13)} ${t('aiSummary')}</button>`;
 
     return `
       <article class="news-card" data-id="${esc(a.id)}" data-url="${esc(a.url)}"
@@ -776,9 +802,8 @@
           <span class="src-badge">${esc(a.source)}</span>
         </div>
         <div class="card-body">
-          ${translated ? `<span class="trans-badge">${t('translatedBadge')}</span>` : ''}
-          <a href="${esc(a.url)}" target="_blank" rel="noopener" class="card-title" dir="auto">${esc(title)}</a>
-          <p class="card-desc" dir="auto">${esc(desc)}</p>
+          <a href="${esc(a.url)}" target="_blank" rel="noopener" class="card-title" dir="auto">${esc(a.title)}</a>
+          <p class="card-desc" dir="auto">${esc(a.description || '')}</p>
           <div class="ai-section">
             ${summaryBtn}
             ${summaryBox}
@@ -794,31 +819,19 @@
   // ══════════════ AI SUMMARY ══════════════
   async function getAiSummary(btn) {
     const card = btn.closest('.news-card');
-    const url  = card.dataset.url;
     const box  = card.querySelector('.ai-box');
     const txt  = card.querySelector('.ai-text');
     if (box.classList.contains('show')) return;
-
-    // Check localStorage cache first — no API call needed
-    const cached = getCachedSummary(url);
-    if (cached) {
-      txt.textContent = cached;
-      box.classList.add('show');
-      btn.disabled = true;
-      btn.innerHTML = `${checkSvg(13)} ${t('summaryReady')}`;
-      return;
-    }
 
     btn.disabled = true;
     btn.innerHTML = `<span class="spin"></span> ${t('summarising')}`;
     try {
       const res = await fetch('/api/summarize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, lang }),
+        body: JSON.stringify({ id: card.dataset.id, title: card.dataset.title, description: card.dataset.desc, content: card.dataset.content, lang: settings.translateTo || lang }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error||'Request failed'); }
       const data = await res.json();
-      setCachedSummary(url, data.summary);   // ← persist to localStorage
       txt.textContent = data.summary;
       box.classList.add('show');
       btn.innerHTML = `${checkSvg(13)} ${t('summaryReady')}`;
@@ -834,37 +847,17 @@
     if (!settings.translateTo || !articles.length) return;
     if (settings.translateTo === lang) return;  // articles already in target language
 
-    // Separate already-cached articles from ones needing an API call
-    const uncached = articles.filter(a => !getCachedTranslation(a.url, settings.translateTo));
-
-    // Apply cached translations to DOM immediately (no flash of original language)
-    const cachedMap = {};
-    for (const a of articles) {
-      const c = getCachedTranslation(a.url, settings.translateTo);
-      if (c) cachedMap[a.id] = c;
-    }
-    if (Object.keys(cachedMap).length) updateCardsWithTranslations(cachedMap);
-
-    if (!uncached.length) return;  // everything was cached — done!
-
     showToast(t('translating'), 'info', 0);
     try {
       const res = await fetch('/api/translate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          articles:   uncached.map(a => ({ id: a.id, title: a.title, description: a.description })),
+          articles:   articles.map(a => ({ id: a.id, title: a.title, description: a.description })),
           targetLang: settings.translateTo,
         }),
       });
       if (!res.ok) throw new Error('Translation request failed');
       const data = await res.json();
-
-      // Persist new translations to localStorage (keyed by article URL)
-      for (const [id, trans] of Object.entries(data.translations)) {
-        const article = uncached.find(a => a.id === id);
-        if (article) setCachedTranslation(article.url, settings.translateTo, trans);
-      }
-
       updateCardsWithTranslations(data.translations);
     } catch (err) {
       showToast('Translation failed: ' + err.message, 'error');
