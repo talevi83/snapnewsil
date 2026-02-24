@@ -369,18 +369,16 @@
 <!-- ══════════════ CATEGORY BAR ══════════════ -->
 <div class="cat-bar">
   <div class="cat-inner" id="catInner">
-    <button class="cat-btn active" data-q="ישראל"       data-lang="he" data-i18n="allNews">All News</button>
-    <button class="cat-btn"        data-q="פוליטיקה"   data-lang="he" data-i18n="politics">Politics</button>
-    <button class="cat-btn"        data-q="ביטחון"     data-lang="he" data-i18n="security">Security</button>
-    <button class="cat-btn"        data-q="שוק"         data-lang="he" data-i18n="economy">Economy</button>
-    <button class="cat-btn"        data-q="דיפלומטיה"  data-lang="he" data-i18n="diplomacy">Diplomacy</button>
-    <button class="cat-btn"        data-q="חברה"        data-lang="he" data-i18n="society">Society</button>
-    <button class="cat-btn"        data-q="טכנולוגיה"  data-lang="he" data-i18n="technology">Technology</button>
-    <button class="cat-btn"        data-q="AI"          data-lang="he" data-i18n="aiNews">🤖 AI</button>
+    <button class="cat-btn active" data-api="rss" data-category="all"        data-lang="he" data-i18n="allNews">All News</button>
+    <button class="cat-btn"        data-api="rss" data-category="politics"   data-lang="he" data-i18n="politics">Politics</button>
+    <button class="cat-btn"        data-api="rss" data-category="security"   data-lang="he" data-i18n="security">Security</button>
+    <button class="cat-btn"        data-api="rss" data-category="economy"    data-lang="he" data-i18n="economy">Economy</button>
+    <button class="cat-btn"        data-api="rss" data-category="diplomacy"  data-lang="he" data-i18n="diplomacy">Diplomacy</button>
+    <button class="cat-btn"        data-api="rss" data-category="society"    data-lang="he" data-i18n="society">Society</button>
+    <button class="cat-btn"        data-api="rss" data-category="technology" data-lang="he" data-i18n="technology">Technology</button>
+    <button class="cat-btn"        data-api="rss" data-category="ai"         data-lang="he" data-i18n="aiNews">🤖 AI</button>
     <div class="cat-divider"></div>
-    <button class="cat-btn cat-btn--world" data-q="Israel" data-lang="en" data-international="true" data-i18n="worldView">🌍 World View</button>
-    <div class="cat-divider"></div>
-    <button class="cat-btn cat-btn--local" data-q="" data-lang="he" data-api="rss" data-i18n="israeliMedia">🗞️ ישראלי</button>
+    <button class="cat-btn cat-btn--world" data-api="rss" data-category="world" data-lang="en" data-i18n="worldView">🌍 World View</button>
   </div>
 </div>
 
@@ -698,12 +696,10 @@
 
   // ══════════════ APP STATE ══════════════
   const FALLBACK_COLORS = ['#1a2e4a','#1a3a2f','#2e1a3a','#3a2a1a','#1a2e38','#2a1a3a','#1e3028','#2e1e18'];
-  let page          = 1;
-  let query         = 'ישראל';
-  let lang          = 'he';
-  let international = false;
-  let apiSource     = 'newsapi';   // 'newsapi' | 'rss'
-  let busy          = false;
+  let page     = 1;
+  let category = 'all';
+  let lang     = 'he';
+  let busy     = false;
   let more          = true;
   let currentArticles = [];   // accumulates across pages for batch translate
 
@@ -768,10 +764,8 @@
     if (!btn) return;
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    query         = btn.dataset.q;
-    lang          = btn.dataset.lang  || 'he';
-    international = btn.dataset.international === 'true';
-    apiSource     = btn.dataset.api || 'newsapi';
+    category = btn.dataset.category || 'all';
+    lang     = btn.dataset.lang     || 'he';
     page          = 1; more = true; currentArticles = [];
     document.getElementById('heroArea').innerHTML = '';
     document.getElementById('gridArea').innerHTML = skelHtml(6);
@@ -787,9 +781,7 @@
     if (busy) return;
     busy = true;
     try {
-      const endpoint = apiSource === 'rss'
-        ? `/api/rss?page=${page}`
-        : `/api/news?page=${page}&q=${encodeURIComponent(query)}&lang=${lang}&international=${international}`;
+      const endpoint = `/api/rss?page=${page}&category=${encodeURIComponent(category)}`;
       const r = await fetch(endpoint);
       if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
       const data = await r.json();
@@ -803,7 +795,7 @@
         <div class="state-box">
           <h3>${t('couldNotLoad')}</h3>
           <p>${esc(err.message)}</p>
-          <p style="margin-top:1rem;font-size:.82rem;opacity:.7">Make sure <code>NEWS_API_KEY</code> is set in your <code>.env</code> file.</p>
+          <p style="margin-top:1rem;font-size:.82rem;opacity:.7">Check the server console for details.</p>
         </div>`;
     } finally { busy = false; }
   }

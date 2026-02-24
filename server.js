@@ -27,12 +27,75 @@ const rssParser = new Parser({
   customFields: { item: [['media:content', 'mediaContent'], ['media:thumbnail', 'mediaThumbnail']] },
 });
 
-const RSS_FEEDS = [
-  { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',       name: 'Ynet'      },
-  { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'     },
-  { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'       },
-  { url: 'https://www.calcalist.co.il/GeneralRSS.aspx',             name: 'Calcalist' },
-  { url: 'https://www.globes.co.il/CommonFiles/Rss/RssGlobes.aspx', name: 'Globes'    },
+const CATEGORY_FEEDS = {
+  all: [
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',       name: 'Ynet'       },
+    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+    { url: 'https://www.maariv.co.il/rss/rsschadashot',               name: 'מעריב'      },
+    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+  ],
+  politics: [
+    { url: 'https://www.maariv.co.il/rss/rssfeedspolitimedini',       name: 'מעריב'      },
+    { url: 'https://rss.walla.co.il/feed/9',                          name: 'Walla'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+  ],
+  security: [
+    { url: 'https://www.maariv.co.il/rss/rssfeedszavavebetachon',     name: 'מעריב'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+  ],
+  economy: [
+    { url: 'https://www.calcalist.co.il/GeneralRSS.aspx',             name: 'כלכליסט'    },
+    { url: 'https://www.globes.co.il/CommonFiles/Rss/RssGlobes.aspx', name: 'גלובס'      },
+    { url: 'https://www.themarker.com/srv/tm-news',                   name: 'TheMarker'  },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss6.xml',        name: 'Ynet'       },
+    { url: 'https://rss.walla.co.il/feed/3',                          name: 'Walla'      },
+    { url: 'https://www.maariv.co.il/rss/rssfeedsasakim',             name: 'מעריב'      },
+  ],
+  diplomacy: [
+    { url: 'https://www.maariv.co.il/rss/rssfeedspolitimedini',       name: 'מעריב'      },
+    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+  ],
+  society: [
+    { url: 'https://www.maariv.co.il/rss/rsschadashot',               name: 'מעריב'      },
+    { url: 'https://rss.walla.co.il/feed/1',                          name: 'Walla'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss2.xml',        name: 'Ynet'       },
+    { url: 'https://www.n12.co.il/rss/articles/news.xml',             name: 'N12'        },
+    { url: 'https://www.israelhayom.co.il/rss.xml',                   name: 'ישראל היום' },
+  ],
+  technology: [
+    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya',       name: 'מעריב'      },
+    { url: 'https://rss.walla.co.il/feed/4',                          name: 'Walla'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml',      name: 'Ynet'       },
+    { url: 'https://www.themarker.com/srv/tm-technation',             name: 'TheMarker'  },
+  ],
+  ai: [
+    { url: 'https://www.maariv.co.il/rss/rssfeedstechnologeya',       name: 'מעריב'      },
+    { url: 'https://rss.walla.co.il/feed/4',                          name: 'Walla'      },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss544.xml',      name: 'Ynet'       },
+    { url: 'https://www.themarker.com/srv/tm-technation',             name: 'TheMarker'  },
+  ],
+  world: [
+    { url: 'https://feeds.bbci.co.uk/news/world/rss.xml',             name: 'BBC'          },
+    { url: 'https://feeds.foxnews.com/foxnews/world',                 name: 'Fox News'     },
+    { url: 'http://rss.cnn.com/rss/edition_world.rss',                name: 'CNN'          },
+    { url: 'https://www.aljazeera.com/xml/rss/all.xml',               name: 'Al Jazeera'   },
+    { url: 'https://www.theguardian.com/world/rss',                   name: 'The Guardian' },
+    { url: 'https://feeds.skynews.com/feeds/rss/world.xml',           name: 'Sky News'     },
+    { url: 'https://feeds.apnews.com/rss/apf-topnews',               name: 'AP'           },
+  ],
+};
+
+// Keywords for AI-tab filtering (title or description must contain at least one)
+const AI_KEYWORDS = [
+  'בינה מלאכותית', 'AI', 'ChatGPT', 'GPT', 'LLM', 'מודל שפה',
+  'OpenAI', 'Claude', 'Gemini', 'Copilot', 'machine learning', 'deep learning',
 ];
 
 function normalizeRssItem(item, feedName) {
@@ -328,11 +391,13 @@ app.post('/api/save-key', (req, res) => {
 
 // ─── GET /api/rss ─────────────────────────────────────────────────────────────
 app.get('/api/rss', async (req, res) => {
-  const { page = 1 } = req.query;
+  const { page = 1, category = 'all' } = req.query;
   const PAGE_SIZE = 12;
+  const feeds = CATEGORY_FEEDS[category] || CATEGORY_FEEDS.all;
+
   try {
     const results = await Promise.allSettled(
-      RSS_FEEDS.map(f =>
+      feeds.map(f =>
         rssParser.parseURL(f.url).then(feed =>
           feed.items.map(item => normalizeRssItem(item, f.name))
         )
@@ -344,11 +409,20 @@ app.get('/api/rss', async (req, res) => {
       .filter(a => a.title && a.url)
       .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
+    // AI tab: filter by keywords; fall back to all tech articles if too few results
+    if (category === 'ai') {
+      const filtered = articles.filter(a => {
+        const text = (a.title + ' ' + (a.description || '')).toLowerCase();
+        return AI_KEYWORDS.some(kw => text.includes(kw.toLowerCase()));
+      });
+      if (filtered.length >= 6) articles = filtered;
+    }
+
     const groups  = groupByStory(articles);
     const pageNum = Math.max(1, parseInt(page, 10));
     const paged   = groups
       .slice((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE)
-      .map((g, i) => ({ ...g, id: `rss-p${pageNum}-${i}` }));
+      .map((g, i) => ({ ...g, id: `rss-${category}-p${pageNum}-${i}` }));
 
     res.json({ articles: paged, totalResults: groups.length, pageSize: PAGE_SIZE });
   } catch (err) {
