@@ -279,7 +279,7 @@ async function scrapeArticle(url) {
     // Strip noise before extracting paragraphs
     $('script, style, noscript, nav, header, footer, aside, ' +
       '[class*="ad-"], [class*="ads-"], [id*="ad-"], [id*="ads-"], ' +
-      '[class*="social"], [class*="share"], [class*="comment"], ' +
+      '[class*="social-share"], [class*="social-buttons"], [class*="social-links"], [class*="share-buttons"], [class*="share-bar"], [class*="comment"], ' +
       '[class*="related"], [class*="sidebar"], [class*="newsletter"], [class*="subscribe"], ' +
       '[class*="taboola"], [id*="taboola"], [class*="outbrain"], [class*="ob-"], ' +
       '[class*="marketing"], [class*="promoted"], [class*="recommended"], ' +
@@ -289,11 +289,17 @@ async function scrapeArticle(url) {
       '[class*="commercial"], [class*="Commercial"], [class*="dfp"], ' +
       '[class*="google-ad"], [class*="googleAd"], [class*="adunit"], ' +
       '[class*="innerad"], [class*="mid-article-ad"], ' +
-      '[data-ad], [data-advertisement], [data-sponsor]'
+      '[data-ad], [data-advertisement], [data-sponsor], ' +
+      // Israel Hayom native-ad carousel blocks
+      '.block-post-content, .block-post, .post-slide, ' +
+      '[class*="block-post"], [class*="post-slide"]'
     ).remove();
 
     // Selectors tried in priority order; pick first yielding >= 2 paragraphs > 40 chars
     const SELECTORS = [
+      // Israel Hayom: real content lives inside .single-post-content .text-content
+      '.single-post-content .text-content p',
+      '.text-content p',
       'article p',
       '[class*="article-body"] p', '[class*="article-content"] p',
       '[class*="article_body"] p', '[class*="article_content"] p',
