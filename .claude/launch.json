@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "israel-news",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js"],
       "port": 3000
     }
   ]
