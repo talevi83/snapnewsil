@@ -1683,12 +1683,18 @@
     }
 
     // ══════════════ SETTINGS STATE ══════════════
+    function safeGet(key, fallback) {
+      try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
+    }
+    function safeSet(key, val) {
+      try { localStorage.setItem(key, val); } catch { /* private browsing or quota */ }
+    }
     const settings = {
-      theme: localStorage.getItem('news-theme') || 'dark',
-      uiLang: localStorage.getItem('news-ui-lang') || 'en',
-      translateTo: localStorage.getItem('news-translate-to') || '',
-      font: localStorage.getItem('news-font') || 'heebo',
-      summaryLength: parseInt(localStorage.getItem('news-summary-length') || '3', 10),
+      theme: safeGet('news-theme', 'dark'),
+      uiLang: safeGet('news-ui-lang', 'en'),
+      translateTo: safeGet('news-translate-to', ''),
+      font: safeGet('news-font', 'heebo'),
+      summaryLength: parseInt(safeGet('news-summary-length', '3'), 10),
     };
 
     const FONT_FAMILIES = {
@@ -1700,7 +1706,7 @@
 
     function setFont(font) {
       settings.font = font;
-      localStorage.setItem('news-font', font);
+      safeSet('news-font', font);
       document.documentElement.style.setProperty('--article-font', FONT_FAMILIES[font]);
       ['heebo', 'rubik', 'frankruhl', 'assistant'].forEach(f => {
         document.getElementById(`pill-font-${f}`)?.classList.toggle('active', f === font);
@@ -1709,7 +1715,7 @@
 
     function setTheme(theme) {
       settings.theme = theme;
-      localStorage.setItem('news-theme', theme);
+      safeSet('news-theme', theme);
       document.documentElement.dataset.theme = theme;
       document.getElementById('pill-dark').classList.toggle('active', theme === 'dark');
       document.getElementById('pill-light').classList.toggle('active', theme === 'light');
@@ -1717,7 +1723,7 @@
 
     function setUiLang(lang) {
       settings.uiLang = lang;
-      localStorage.setItem('news-ui-lang', lang);
+      safeSet('news-ui-lang', lang);
       document.documentElement.lang = lang;
       document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
       document.getElementById('pill-en').classList.toggle('active', lang === 'en');
@@ -1728,7 +1734,7 @@
     function setSummaryLength(n) {
       n = Math.min(10, Math.max(2, n));
       settings.summaryLength = n;
-      localStorage.setItem('news-summary-length', n);
+      safeSet('news-summary-length', n);
       const val = document.getElementById('summaryVal');
       const slider = document.getElementById('summarySlider');
       if (val) val.textContent = n;
@@ -1737,7 +1743,7 @@
 
     function setTranslateTo(lang) {
       settings.translateTo = lang;
-      localStorage.setItem('news-translate-to', lang);
+      safeSet('news-translate-to', lang);
       if (!lang) {
         clearTranslations();
       } else if (currentArticles.length) {

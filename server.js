@@ -17,9 +17,64 @@ if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
+// ─── Security headers ────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+
+// ─── Simple in-memory rate limiter ───────────────────────────────────────────
+const rateLimitMap = new Map();
+function rateLimit(windowMs, maxRequests) {
+  return (req, res, next) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    const key = `${ip}:${req.route?.path || req.path}`;
+    const now = Date.now();
+    let entry = rateLimitMap.get(key);
+    if (!entry || now - entry.start > windowMs) {
+      entry = { start: now, count: 0 };
+      rateLimitMap.set(key, entry);
+    }
+    entry.count++;
+    if (entry.count > maxRequests) {
+      return res.status(429).json({ error: 'Too many requests. Please slow down.' });
+    }
+    next();
+  };
+}
+// Cleanup stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap) {
+    if (now - entry.start > 300_000) rateLimitMap.delete(key);
+  }
+}, 300_000);
+
+// ─── SSRF protection — block private/internal IPs ────────────────────────────
+const { URL } = require('url');
+const net = require('net');
+function isPrivateHostname(hostname) {
+  if (net.isIP(hostname)) {
+    const parts = hostname.split('.').map(Number);
+    // 127.x.x.x, 10.x.x.x, 192.168.x.x, 172.16-31.x.x, 0.0.0.0, 169.254.x.x
+    if (parts[0] === 127) return true;
+    if (parts[0] === 10) return true;
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    if (parts[0] === 0) return true;
+    if (parts[0] === 169 && parts[1] === 254) return true;
+    // IPv6-mapped
+    if (hostname === '::1' || hostname === '::') return true;
+  }
+  if (hostname === 'localhost' || hostname.endsWith('.local') || hostname.endsWith('.internal')) return true;
+  return false;
+}
 
 // ─── RSS setup ────────────────────────────────────────────────────────────────
 const rssParser = new Parser({
@@ -227,7 +282,14 @@ async function scrapeArticle(url) {
       '[class*="social"], [class*="share"], [class*="comment"], ' +
       '[class*="related"], [class*="sidebar"], [class*="newsletter"], [class*="subscribe"], ' +
       '[class*="taboola"], [id*="taboola"], [class*="outbrain"], [class*="ob-"], ' +
-      '[class*="marketing"], [class*="promoted"], [class*="recommended"]'
+      '[class*="marketing"], [class*="promoted"], [class*="recommended"], ' +
+      // Israel Hayom specific ad/promo selectors
+      '[class*="promo"], [class*="Promo"], [class*="banner"], [class*="Banner"], ' +
+      '[class*="sponsor"], [class*="Sponsor"], [class*="native-ad"], ' +
+      '[class*="commercial"], [class*="Commercial"], [class*="dfp"], ' +
+      '[class*="google-ad"], [class*="googleAd"], [class*="adunit"], ' +
+      '[class*="innerad"], [class*="mid-article-ad"], ' +
+      '[data-ad], [data-advertisement], [data-sponsor]'
     ).remove();
 
     // Selectors tried in priority order; pick first yielding >= 2 paragraphs > 40 chars
@@ -241,8 +303,12 @@ async function scrapeArticle(url) {
       'main p',
     ];
 
+    // Common Hebrew/English ad patterns to filter out of paragraphs
+    const AD_PARAGRAPH_RE = /קוד קופון|הנחה מיוחדת|לרכישה\s*לחצו|לרכישה\s*הקליקו|sponsored|advertisement|שיתוף פעולה מסחרי|בשיתוף עם|תוכן שיווקי|תוכן ממומן|פרסומת|הטבה בלעדית|מבצע מיוחד|לפרטים נוספים והזמנה|להצטרפות חייגו|למימוש ההטבה|צילום:\s*יח"צ|קרדיט תמונה|באדיבות החברה|צילום באדיבות/i;
+
     const extract = sel =>
-      $(sel).map((_, el) => $(el).text().trim()).get().filter(t => t.length > 40);
+      $(sel).map((_, el) => $(el).text().trim()).get()
+        .filter(t => t.length > 40 && !AD_PARAGRAPH_RE.test(t));
 
     let paragraphs = [];
     for (const sel of SELECTORS) {
@@ -260,7 +326,7 @@ async function scrapeArticle(url) {
 }
 
 // ─── POST /api/summarize ──────────────────────────────────────────────────────
-app.post('/api/summarize', async (req, res) => {
+app.post('/api/summarize', rateLimit(60_000, 15), async (req, res) => {
   if (!openai) {
     return res.status(503).json({
       error: 'AI summaries are not enabled. OPENAI_API_KEY is not set.',
@@ -279,8 +345,8 @@ app.post('/api/summarize', async (req, res) => {
 
   const n = Math.min(10, Math.max(2, parseInt(sentences, 10) || 3));
   const systemPrompt = lang === 'he'
-    ? `אתה מסכם חדשות. השב ב-${n} משפטים עובדתיים וניטרליים בעברית ללא מספור. אם אין מספיק תוכן, כתוב פחות לפי הצורך.`
-    : `You are a news summarizer. Respond with ${n} neutral, factual sentences in English. Do not number the sentences. If there is not enough content, use fewer sentences as needed.`;
+    ? `אתה מסכם חדשות. השב ב-${n} משפטים עובדתיים וניטרליים בעברית ללא מספור. אם אין מספיק תוכן, כתוב פחות לפי הצורך. התעלם לחלוטין מתוכן פרסומי, שיווקי או ממומן — סכם רק את הידיעה החדשותית.`
+    : `You are a news summarizer. Respond with ${n} neutral, factual sentences in English. Do not number the sentences. If there is not enough content, use fewer sentences as needed. Completely ignore any advertising, marketing, or sponsored content — summarize only the news story.`;
   const userPrompt = lang === 'he'
     ? `סכם את כתבת החדשות הבאה בעברית:\n\n${context}`
     : `Summarize this news article:\n\n${context}`;
@@ -293,7 +359,7 @@ app.post('/api/summarize', async (req, res) => {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-    });
+    }, { timeout: 30000 });
 
     const summary = completion.choices[0].message.content;
     res.json({ summary });
@@ -304,7 +370,7 @@ app.post('/api/summarize', async (req, res) => {
 });
 
 // ─── POST /api/translate ──────────────────────────────────────────────────────
-app.post('/api/translate', async (req, res) => {
+app.post('/api/translate', rateLimit(60_000, 10), async (req, res) => {
   if (!openai) {
     return res.status(503).json({ error: 'OPENAI_API_KEY not set' });
   }
@@ -312,6 +378,9 @@ app.post('/api/translate', async (req, res) => {
   const { articles, targetLang } = req.body;
   if (!Array.isArray(articles) || !targetLang) {
     return res.status(400).json({ error: 'articles[] and targetLang required' });
+  }
+  if (articles.length > 30) {
+    return res.status(400).json({ error: 'Too many articles — max 30 per request' });
   }
 
   const LANG_NAMES = {
@@ -339,7 +408,7 @@ Keep the same order and IDs. Preserve proper nouns where culturally appropriate.
           ),
         },
       ],
-    });
+    }, { timeout: 45000 });
 
     const parsed = JSON.parse(completion.choices[0].message.content);
     const results = {};
@@ -390,24 +459,26 @@ app.post('/api/save-key', (req, res) => {
 
 // ─── GET /api/img-proxy ───────────────────────────────────────────────────────
 // Fetches remote images server-side, bypassing hotlink / Referer checks on news sites.
-app.get('/api/img-proxy', async (req, res) => {
+app.get('/api/img-proxy', rateLimit(60_000, 60), async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url');
   let parsed;
   try { parsed = new URL(url); } catch { return res.status(400).send('Invalid url'); }
   if (!['http:', 'https:'].includes(parsed.protocol)) return res.status(400).send('Bad protocol');
+  if (isPrivateHostname(parsed.hostname)) return res.status(403).send('Blocked host');
 
   try {
     const response = await axios.get(url, {
       responseType: 'stream',
       timeout: 8000,
+      maxContentLength: 10 * 1024 * 1024,  // 10 MB limit
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
         'Referer': `${parsed.protocol}//${parsed.host}/`,   // appear to come from the image's own site
       },
     });
-    const ct = response.headers['content-type'] || 'image/jpeg';
+    const ct = (response.headers['content-type'] || 'image/jpeg').split(';')[0].trim();
     if (!ct.startsWith('image/')) return res.status(415).send('Not an image');
 
     const isGifOrSvg = ct === 'image/gif' || ct === 'image/svg+xml';
@@ -416,6 +487,7 @@ app.get('/api/img-proxy', async (req, res) => {
 
     response.data.on('error', streamErr => {
       console.error('Image proxy stream error:', streamErr.message);
+      if (!res.headersSent) res.status(502);
       res.end();
     });
 
@@ -432,6 +504,7 @@ app.get('/api/img-proxy', async (req, res) => {
 
       transformer.on('error', err => {
         console.error('Sharp error:', err.message);
+        if (!res.headersSent) res.status(502);
         res.end();
       });
 
@@ -440,16 +513,18 @@ app.get('/api/img-proxy', async (req, res) => {
       response.data.pipe(res);
     }
   } catch (err) {
-    res.status(502).send('Could not fetch image');
+    if (!res.headersSent) res.status(502).send('Could not fetch image');
   }
 });
 
 // ─── GET /api/scrape-image ────────────────────────────────────────────────────
 // Scrapes an article URL to find its og:image, then redirects to img-proxy
-app.get('/api/scrape-image', async (req, res) => {
+app.get('/api/scrape-image', rateLimit(60_000, 60), async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url');
   try {
+    const parsedScrape = new URL(url);
+    if (isPrivateHostname(parsedScrape.hostname)) return res.status(403).send('Blocked host');
     const response = await axios.get(url, {
       timeout: 8000,
       headers: {
@@ -473,7 +548,8 @@ app.get('/api/scrape-image', async (req, res) => {
         const src = $(el).attr('src');
         if (!src) return;
         // Basic heuristic: ignore small icons or trackers
-        if (src.includes('icon') || src.includes('avatar') || src.includes('logo')) return;
+        const srcLower = src.toLowerCase();
+        if (srcLower.includes('icon') || srcLower.includes('avatar') || srcLower.includes('logo') || srcLower.includes('pixel') || srcLower.includes('tracker') || srcLower.includes('1x1')) return;
         const w = parseInt($(el).attr('width') || '0', 10);
         const h = parseInt($(el).attr('height') || '0', 10);
         const area = w * h;
@@ -518,8 +594,8 @@ app.get('/api/rss', async (req, res) => {
     let articles = [];
     results.forEach(r => { if (r.status === 'fulfilled') articles.push(...r.value); });
 
-    // Ad and sponsored content filtering keywords
-    const AD_KEYWORDS = /\b(APR|credit card|home equity|cash|refinance|mortgage|loan|sponsored|promoted|intro|0%|invest|insurance)\b/i;
+    // Ad and sponsored content filtering keywords (English + Hebrew)
+    const AD_KEYWORDS = /\b(APR|credit card|home equity|cash|refinance|mortgage|loan|sponsored|promoted|intro|0%|invest|insurance)\b|תוכן שיווקי|תוכן ממומן|בשיתוף פעולה מסחרי|פרסומת|מודעה/i;
 
     articles = articles
       .filter(a => a.title && a.url && !AD_KEYWORDS.test(a.title))
@@ -552,7 +628,7 @@ app.get('/api/rss', async (req, res) => {
 });
 
 // ─── POST /api/synthesize-title ───────────────────────────────────────────────
-app.post('/api/synthesize-title', async (req, res) => {
+app.post('/api/synthesize-title', rateLimit(60_000, 15), async (req, res) => {
   if (!openai) return res.status(503).json({ error: 'OpenAI not configured' });
   const { sources } = req.body;   // [{name, title}]
   if (!Array.isArray(sources) || sources.length < 2)
@@ -570,7 +646,7 @@ app.post('/api/synthesize-title', async (req, res) => {
           content: sources.map(s => `${s.name}: ${s.title}`).join('\n'),
         },
       ],
-    });
+    }, { timeout: 15000 });
     res.json({ title: completion.choices[0].message.content.trim() });
   } catch (err) {
     console.error('Synthesize error:', err.message);
