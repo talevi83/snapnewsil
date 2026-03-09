@@ -378,6 +378,65 @@ app.post('/api/summarize', rateLimit(60_000, 15), async (req, res) => {
   }
 });
 
+// ─── POST /api/chat ───────────────────────────────────────────────────────────
+app.post('/api/chat', rateLimit(60_000, 20), async (req, res) => {
+  if (!genAI) {
+    return res.status(503).json({ error: 'AI chat is not enabled. GEMINI_API_KEY is not set.' });
+  }
+
+  const { title, url, articleContent, history = [], message, lang = 'he' } = req.body;
+  if (!title) return res.status(400).json({ error: 'title is required' });
+  if (!message || !message.trim()) return res.status(400).json({ error: 'message is required' });
+  if (!Array.isArray(history) || history.length > 20) {
+    return res.status(400).json({ error: 'Invalid history (max 20 turns)' });
+  }
+
+  // Get article text: use cached content if provided, otherwise scrape
+  let articleText = articleContent;
+  if (!articleText || articleText.length < 100) {
+    articleText = await scrapeArticle(url);
+  }
+  if (!articleText) articleText = title;
+
+  const systemPrompt = lang === 'he'
+    ? 'אתה עוזר חדשות חכם. המשתמש שואל שאלות על כתבה חדשותית. ענה על סמך תוכן הכתבה. אם המידע לא מופיע בכתבה, ציין זאת בבירור ("המידע לא מופיע בכתבה, אך...") וענה מידע כללי. ענה בעברית בצורה תמציתית.'
+    : 'You are a smart news assistant. The user asks questions about a news article. Answer based on the article content. If the info is not in the article, clearly state that ("This is not mentioned in the article, but...") and answer from general knowledge. Be concise.';
+
+  const contextMsg = lang === 'he'
+    ? `הנה כתבת החדשות שעליה אדון:\n\nכותרת: ${title}\n\n${articleText}`
+    : `Here is the news article I will discuss:\n\nTitle: ${title}\n\n${articleText}`;
+
+  const ackMsg = lang === 'he'
+    ? 'קראתי את הכתבה. מה תרצה לשאול?'
+    : 'I have read the article. What would you like to ask?';
+
+  try {
+    const contents = [
+      { role: 'user', parts: [{ text: contextMsg }] },
+      { role: 'model', parts: [{ text: ackMsg }] },
+    ];
+
+    for (const turn of history) {
+      if (turn.role === 'user' || turn.role === 'model') {
+        contents.push({ role: turn.role, parts: [{ text: turn.text }] });
+      }
+    }
+    contents.push({ role: 'user', parts: [{ text: message }] });
+
+    const specificModel = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash-lite',
+      systemInstruction: systemPrompt,
+    });
+
+    const result = await specificModel.generateContent({ contents });
+    const reply = result.response.text();
+    res.json({ reply, articleContent: articleText });
+  } catch (err) {
+    console.error('Chat error:', err.message);
+    res.status(500).json({ error: 'Failed to generate chat response' });
+  }
+});
+
 // ─── POST /api/translate ──────────────────────────────────────────────────────
 app.post('/api/translate', rateLimit(60_000, 10), async (req, res) => {
   if (!genAI || !geminiModel) {

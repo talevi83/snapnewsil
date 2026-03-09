@@ -1210,6 +1210,199 @@
       margin-top: 1.1rem;
     }
 
+    /* ══════════════ AI CHAT MODAL ══════════════ */
+    .chat-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .65);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .chat-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 560px;
+      height: min(75vh, 600px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      animation: fadeUp .28s ease;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .chat-header-icon {
+      color: var(--blue);
+      flex-shrink: 0;
+      display: flex;
+    }
+
+    .chat-header-title {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+    }
+
+    .chat-close {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .85rem;
+      transition: all var(--ease);
+      font-family: inherit;
+      flex-shrink: 0;
+      margin-inline-start: .75rem;
+    }
+
+    .chat-close:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+
+    .chat-msg {
+      max-width: 85%;
+      padding: .65rem .9rem;
+      border-radius: 10px;
+      font-size: .84rem;
+      line-height: 1.6;
+      word-wrap: break-word;
+      animation: fadeUp .2s ease;
+    }
+
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--blue);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+
+    html[dir="rtl"] .chat-msg.user {
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 3px;
+    }
+
+    .chat-msg.ai {
+      align-self: flex-start;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+
+    html[dir="rtl"] .chat-msg.ai {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 3px;
+    }
+
+    .chat-msg.ai.typing {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      gap: 8px;
+      padding: .75rem 1.15rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: .55rem .85rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--ease);
+    }
+
+    .chat-input:focus {
+      border-color: var(--blue);
+    }
+
+    .chat-send-btn {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--blue);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity var(--ease);
+    }
+
+    .chat-send-btn:hover:not(:disabled) {
+      opacity: .85;
+    }
+
+    .chat-send-btn:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    @media (max-width: 640px) {
+      .chat-modal {
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        border: none;
+      }
+      .chat-overlay {
+        padding: 0;
+      }
+    }
+
     /* ══════════════ TOAST ══════════════ */
     .toast {
       position: fixed;
@@ -1575,6 +1768,28 @@
     </div>
   </div>
 
+  <!-- AI Chat Modal -->
+  <div class="chat-overlay" id="chatOverlay" style="display:none">
+    <div class="chat-modal">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="chat-header-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <h3 class="chat-header-title" id="chatTitle" dir="auto"></h3>
+        </div>
+        <button class="chat-close" onclick="closeChatModal()">&#10005;</button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-wrap">
+        <input type="text" class="chat-input" id="chatInput" dir="auto" autocomplete="off" spellcheck="true" />
+        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="_toast"></div>
 
@@ -1599,6 +1814,10 @@
         aiSummaryLabel: 'AI Summary',
         summaryReady: 'Summary ready',
         summarising: 'Summarising…',
+        askAi: 'Ask AI about the article',
+        chatWelcome: 'Ask me anything about this article!',
+        chatThinking: 'Thinking…',
+        chatPlaceholder: 'Ask a question about the article…',
         readMore: 'Read more →',
         readFullStory: 'Read Full Story →',
         breaking: '⚡ Breaking',
@@ -1647,6 +1866,10 @@
         aiSummaryLabel: 'סיכום AI',
         summaryReady: 'הסיכום מוכן',
         summarising: 'מסכם…',
+        askAi: 'שאל AI על הכתבה',
+        chatWelcome: 'שאלו אותי כל דבר על הכתבה!',
+        chatThinking: 'חושב…',
+        chatPlaceholder: 'שאל שאלה על הכתבה…',
         readMore: '← קרא עוד',
         readFullStory: '← קרא את הסיפור המלא',
         breaking: '⚡ בשעה זו',
@@ -1778,7 +2001,12 @@
       document.getElementById('settingsPanel').classList.remove('open');
       document.getElementById('settingsOverlay').classList.remove('open');
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.getElementById('chatOverlay').style.display !== 'none') closeChatModal();
+        else closeSettings();
+      }
+    });
 
     // ══════════════ APP STATE ══════════════
     const FALLBACK_COLORS = ['#1a2e4a', '#1a3a2f', '#2e1a3a', '#3a2a1a', '#1a2e38', '#2a1a3a', '#1e3028', '#2e1e18'];
@@ -1789,6 +2017,13 @@
     let busy = false;
     let more = true;
     let currentArticles = [];   // accumulates across pages for batch translate
+
+    // Chat state
+    let chatHistory = [];
+    let chatArticleTitle = '';
+    let chatArticleUrl = '';
+    let chatArticleContent = '';
+    let chatBusy = false;
 
     // ══════════════ API KEY MODAL ══════════════
     async function checkApiKey() {
@@ -2053,12 +2288,116 @@
         txt.textContent = data.summary;
         box.classList.add('show');
         btn.innerHTML = `${checkSvg(13)} ${t('summaryReady')}`;
+        // Inject "Ask AI" chat button
+        if (!card.querySelector('.ai-chat-btn')) {
+          const chatBtn = document.createElement('button');
+          chatBtn.className = 'ai-btn ai-chat-btn';
+          chatBtn.innerHTML = `${chatSvg(13)} ${t('askAi')}`;
+          chatBtn.onclick = () => openChatModal(card);
+          card.querySelector('.ai-section').appendChild(chatBtn);
+        }
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `${starSvg(13)} ${t('aiSummary')}`;
         showToast(err.message, 'error');
       }
     }
+
+    // ══════════════ AI CHAT ══════════════
+    function chatSvg(s) { return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`; }
+
+    function openChatModal(card) {
+      chatHistory = [];
+      chatArticleTitle = card.dataset.title;
+      chatArticleUrl = card.dataset.url;
+      chatArticleContent = '';
+      chatBusy = false;
+
+      document.getElementById('chatTitle').textContent = chatArticleTitle;
+      document.getElementById('chatMessages').innerHTML =
+        `<div class="chat-msg ai" dir="auto">${esc(t('chatWelcome'))}</div>`;
+      const chatInput = document.getElementById('chatInput');
+      chatInput.value = '';
+      chatInput.placeholder = t('chatPlaceholder');
+      document.getElementById('chatSendBtn').disabled = false;
+      document.getElementById('chatOverlay').style.display = 'flex';
+      chatInput.focus();
+    }
+
+    function closeChatModal() {
+      document.getElementById('chatOverlay').style.display = 'none';
+      chatHistory = [];
+      chatArticleContent = '';
+    }
+
+    async function sendChatMessage() {
+      if (chatBusy) return;
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const msgsEl = document.getElementById('chatMessages');
+      const sendBtn = document.getElementById('chatSendBtn');
+
+      // Show user message
+      msgsEl.insertAdjacentHTML('beforeend',
+        `<div class="chat-msg user" dir="auto">${esc(msg)}</div>`);
+      input.value = '';
+      input.disabled = true;
+      sendBtn.disabled = true;
+
+      // Show typing indicator
+      const typingId = 'chat-typing-' + Date.now();
+      msgsEl.insertAdjacentHTML('beforeend',
+        `<div class="chat-msg ai typing" id="${typingId}" dir="auto"><span class="spin" style="display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:rotate .65s linear infinite"></span> ${esc(t('chatThinking'))}</div>`);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+
+      chatBusy = true;
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: chatArticleTitle,
+            url: chatArticleUrl,
+            articleContent: chatArticleContent || undefined,
+            history: chatHistory.slice(-18),
+            message: msg,
+            lang: settings.translateTo || lang,
+          }),
+        });
+        if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Request failed'); }
+        const data = await res.json();
+
+        if (data.articleContent) chatArticleContent = data.articleContent;
+        chatHistory.push({ role: 'user', text: msg });
+        chatHistory.push({ role: 'model', text: data.reply });
+
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) {
+          typingEl.classList.remove('typing');
+          typingEl.innerHTML = esc(data.reply).replace(/\n/g, '<br>');
+        }
+      } catch (err) {
+        document.getElementById(typingId)?.remove();
+        msgsEl.insertAdjacentHTML('beforeend',
+          `<div class="chat-msg ai" dir="auto" style="color:var(--red)">${esc(err.message)}</div>`);
+      } finally {
+        chatBusy = false;
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+    }
+
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); }
+    });
+
+    document.getElementById('chatOverlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeChatModal();
+    });
 
     // ══════════════ SYNTHESIZE TITLE ══════════════
     async function synthesizeTitle(btn) {
