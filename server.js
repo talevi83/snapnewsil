@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
-const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Parser = require('rss-parser');
 const path = require('path');
 const fs = require('fs');
@@ -11,10 +11,12 @@ const sharp = require('sharp');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// OpenAI client is optional — only used for AI summaries
-let openai = null;
-if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Gemini client is optional — only used for AI summaries
+let genAI = null;
+let geminiModel = null;
+if (process.env.GEMINI_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 }
 
 // ─── Security headers ────────────────────────────────────────────────────────
@@ -205,7 +207,11 @@ function groupByStory(articles) {
       .map(s => articles.find(a => a.url === s.url))
       .find(a => a?.urlToImage)?.urlToImage || primary.urlToImage;
 
-    groups.push({ ...primary, urlToImage: bestImage, sources });
+    // Deduplicate sources by name — keep one entry per outlet
+    const uniqueSources = Array.from(
+      new Map(sources.map(s => [s.name, s])).values()
+    );
+    groups.push({ ...primary, urlToImage: bestImage, sources: uniqueSources });
   }
   return groups;
 }
@@ -333,9 +339,9 @@ async function scrapeArticle(url) {
 
 // ─── POST /api/summarize ──────────────────────────────────────────────────────
 app.post('/api/summarize', rateLimit(60_000, 15), async (req, res) => {
-  if (!openai) {
+  if (!genAI || !geminiModel) {
     return res.status(503).json({
-      error: 'AI summaries are not enabled. OPENAI_API_KEY is not set.',
+      error: 'AI summaries are not enabled. GEMINI_API_KEY is not set.',
     });
   }
 
@@ -358,27 +364,24 @@ app.post('/api/summarize', rateLimit(60_000, 15), async (req, res) => {
     : `Summarize this news article:\n\n${context}`;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: Math.max(200, n * 55),
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-    }, { timeout: 30000 });
+    const specificModel = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: systemPrompt
+    });
 
-    const summary = completion.choices[0].message.content;
+    const result = await specificModel.generateContent(userPrompt);
+    const summary = result.response.text();
     res.json({ summary });
   } catch (err) {
-    console.error('OpenAI error:', err.message);
+    console.error('Gemini error:', err.message);
     res.status(500).json({ error: 'Failed to generate summary' });
   }
 });
 
 // ─── POST /api/translate ──────────────────────────────────────────────────────
 app.post('/api/translate', rateLimit(60_000, 10), async (req, res) => {
-  if (!openai) {
-    return res.status(503).json({ error: 'OPENAI_API_KEY not set' });
+  if (!genAI || !geminiModel) {
+    return res.status(503).json({ error: 'GEMINI_API_KEY not set' });
   }
 
   const { articles, targetLang } = req.body;
@@ -396,27 +399,23 @@ app.post('/api/translate', rateLimit(60_000, 10), async (req, res) => {
   const targetName = LANG_NAMES[targetLang] || targetLang;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 4000,
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content: `You are a professional news translator. Translate article titles and descriptions to ${targetName}.
+    const systemPrompt = `You are a professional news translator. Translate article titles and descriptions to ${targetName}.
 Return JSON: {"translations":[{"id":"...","title":"...","description":"..."},...]}
-Keep the same order and IDs. Preserve proper nouns where culturally appropriate.`,
-        },
-        {
-          role: 'user',
-          content: JSON.stringify(
-            articles.map(a => ({ id: a.id, title: a.title, description: a.description || '' }))
-          ),
-        },
-      ],
-    }, { timeout: 45000 });
+Keep the same order and IDs. Preserve proper nouns where culturally appropriate.`;
 
-    const parsed = JSON.parse(completion.choices[0].message.content);
+    const specificModel = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: systemPrompt,
+      generationConfig: { responseMimeType: "application/json" }
+    });
+
+    const userPrompt = JSON.stringify(
+      articles.map(a => ({ id: a.id, title: a.title, description: a.description || '' }))
+    );
+
+    const result = await specificModel.generateContent(userPrompt);
+    const parsed = JSON.parse(result.response.text());
+
     const results = {};
     for (const t of parsed.translations) {
       results[t.id] = { title: t.title, description: t.description };
@@ -430,24 +429,24 @@ Keep the same order and IDs. Preserve proper nouns where culturally appropriate.
 
 // ─── GET /api/config-status ───────────────────────────────────────────────────
 app.get('/api/config-status', (req, res) => {
-  res.json({ openaiKeySet: !!openai });
+  res.json({ geminiKeySet: !!genAI });
 });
 
 // ─── POST /api/save-key ───────────────────────────────────────────────────────
 app.post('/api/save-key', (req, res) => {
   const { key } = req.body;
-  if (!key || !key.startsWith('sk-')) {
-    return res.status(400).json({ error: 'Invalid key — must start with sk-' });
+  if (!key || !key.startsWith('AIza')) {
+    return res.status(400).json({ error: 'Invalid key — must start with AIza' });
   }
 
   const envPath = path.join(__dirname, '.env');
   let envContent = '';
   try { envContent = fs.readFileSync(envPath, 'utf8'); } catch (_) { /* file may not exist */ }
 
-  if (/^OPENAI_API_KEY=/m.test(envContent)) {
-    envContent = envContent.replace(/^OPENAI_API_KEY=.*/m, `OPENAI_API_KEY=${key}`);
+  if (/^GEMINI_API_KEY=/m.test(envContent)) {
+    envContent = envContent.replace(/^GEMINI_API_KEY=.*/m, `GEMINI_API_KEY=${key}`);
   } else {
-    envContent = envContent.trimEnd() + `\nOPENAI_API_KEY=${key}\n`;
+    envContent = envContent.trimEnd() + `\nGEMINI_API_KEY=${key}\n`;
   }
 
   try {
@@ -457,8 +456,9 @@ app.post('/api/save-key', (req, res) => {
   }
 
   // Apply immediately — no restart needed
-  process.env.OPENAI_API_KEY = key;
-  openai = new OpenAI({ apiKey: key });
+  process.env.GEMINI_API_KEY = key;
+  genAI = new GoogleGenerativeAI(key);
+  geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
   res.json({ success: true });
 });
@@ -600,8 +600,8 @@ app.get('/api/rss', async (req, res) => {
     let articles = [];
     results.forEach(r => { if (r.status === 'fulfilled') articles.push(...r.value); });
 
-    // Ad and sponsored content filtering keywords (English + Hebrew)
-    const AD_KEYWORDS = /\b(APR|credit card|home equity|cash|refinance|mortgage|loan|sponsored|promoted|intro|0%|invest|insurance)\b|תוכן שיווקי|תוכן ממומן|בשיתוף פעולה מסחרי|פרסומת|מודעה/i;
+    // Ad, sponsored content, and non-news filtering keywords (English + Hebrew)
+    const AD_KEYWORDS = /\b(APR|credit card|home equity|cash|refinance|mortgage|loan|sponsored|promoted|intro|0%|invest|insurance|horoscope|astrology|zodiac)\b|תוכן שיווקי|תוכן ממומן|בשיתוף פעולה מסחרי|פרסומת|מודעה|הורוסקופ|אסטרולוגיה|מזל טלה|מזל שור|מזל תאומים|מזל סרטן|מזל אריה|מזל בתולה|מזל מאזניים|מזל עקרב|מזל קשת|מזל גדי|מזל דלי|מזל דגים|תחזית אסטרולוגית/i;
 
     articles = articles
       .filter(a => a.title && a.url && !AD_KEYWORDS.test(a.title))
@@ -635,25 +635,20 @@ app.get('/api/rss', async (req, res) => {
 
 // ─── POST /api/synthesize-title ───────────────────────────────────────────────
 app.post('/api/synthesize-title', rateLimit(60_000, 15), async (req, res) => {
-  if (!openai) return res.status(503).json({ error: 'OpenAI not configured' });
+  if (!genAI || !geminiModel) return res.status(503).json({ error: 'Gemini not configured' });
   const { sources } = req.body;   // [{name, title}]
   if (!Array.isArray(sources) || sources.length < 2)
     return res.status(400).json({ error: 'Need at least 2 sources' });
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o', max_tokens: 60,
-      messages: [
-        {
-          role: 'system',
-          content: 'אתה עורך חדשות. כתוב כותרת ניטרלית ותמציתית בעברית (עד 12 מילים) שמסכמת את הידיעה על פי הכותרות הבאות ממקורות שונים. עובדות בלבד, ללא פרשנות.',
-        },
-        {
-          role: 'user',
-          content: sources.map(s => `${s.name}: ${s.title}`).join('\n'),
-        },
-      ],
-    }, { timeout: 15000 });
-    res.json({ title: completion.choices[0].message.content.trim() });
+    const systemPrompt = 'אתה עורך חדשות. כתוב כותרת ניטרלית ותמציתית בעברית (עד 12 מילים) שמסכמת את הידיעה על פי הכותרות הבאות ממקורות שונים. עובדות בלבד, ללא פרשנות.';
+    const specificModel = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-lite",
+      systemInstruction: systemPrompt
+    });
+    const userPrompt = sources.map(s => `${s.name}: ${s.title}`).join('\n');
+
+    const result = await specificModel.generateContent(userPrompt);
+    res.json({ title: result.response.text().trim() });
   } catch (err) {
     console.error('Synthesize error:', err.message);
     res.status(500).json({ error: 'Synthesis failed' });

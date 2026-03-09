@@ -31,7 +31,31 @@
       "WebFetch(domain:www.ynet.co.il)",
       "mcp__Claude_Preview__preview_start",
       "Bash(curl:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(npx kill-port 3000)",
+      "Bash(lsof -i :3000 -t)",
+      "Bash(xargs -r kill -9)",
+      "Bash(git push -u origin bugFix)",
+      "Bash(gh pr:*)",
+      "Bash(where gh)",
+      "Bash(cmd /c \"where gh\")",
+      "Bash(cmd /c \"gh --version\")",
+      "Bash(git checkout main)",
+      "Bash(git merge bugFix)",
+      "Bash(git push origin main)",
+      "Bash(git pull origin main --rebase)",
+      "Bash(git stash)",
+      "Bash(git stash pop)",
+      "Bash(docker build -t talevi83/snapnewsil:latest .)",
+      "Bash(docker push talevi83/snapnewsil:latest)",
+      "Bash(docker buildx ls)",
+      "Bash(docker buildx build --platform linux/amd64,linux/arm64 -t talevi83/snapnewsil:latest --push .)",
+      "Bash(git rm --cached docker-compose.yml)",
+      "Bash(docker version --format '{{.Server.Version}}')",
+      "Bash(docker buildx version)",
+      "Bash(docker buildx create --name multiarch --driver docker-container --use)",
+      "Bash(docker buildx use multiarch)",
+      "Bash(docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t talevi83/snapnewsil:latest --push .)"
     ]
   }
 }

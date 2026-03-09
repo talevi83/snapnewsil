@@ -1474,8 +1474,8 @@
   <footer>
     <div class="footer-inner">
       <p data-i18n="footerLine1">News sourced from <a href="https://newsapi.org" target="_blank"
-          rel="noopener">NewsAPI.org</a> &nbsp;·&nbsp; AI by <a href="https://openai.com" target="_blank"
-          rel="noopener">GPT-4o</a></p>
+          rel="noopener">NewsAPI.org</a> &nbsp;·&nbsp; AI by <a href="https://gemini.google.com" target="_blank"
+          rel="noopener">Gemini 2.5 Flash Lite</a></p>
       <p style="opacity:.5" data-i18n="footerLine2">Updated in real time · Summaries and translations are AI-generated
       </p>
     </div>
@@ -1525,7 +1525,6 @@
         </div>
       </div>
 
-      <!-- Article Translation -->
       <div class="settings-section">
         <label data-i18n="translateArticles">Translate Articles</label>
         <select class="settings-select" id="translateSelect" onchange="setTranslateTo(this.value)">
@@ -1538,7 +1537,9 @@
           <option value="es">Español (Spanish)</option>
           <option value="de">Deutsch (German)</option>
         </select>
-        <p class="settings-hint" data-i18n="translateHint">Uses GPT-4o to translate titles and descriptions of loaded
+        <p class="settings-hint" data-i18n="translateHint">Uses Gemini 2.5 Flash Lite to translate titles and
+          descriptions of
+          loaded
           articles.</p>
       </div>
 
@@ -1561,10 +1562,11 @@
   <div class="modal-overlay" id="apiKeyModal" style="display:none">
     <div class="modal-card">
       <div class="modal-icon">🔑</div>
-      <h2 class="modal-title">OpenAI API Key Required</h2>
-      <p class="modal-desc">AI summaries and article translation use GPT-4o and require an OpenAI API key. Enter your
+      <h2 class="modal-title">Google Gemini API Key Required</h2>
+      <p class="modal-desc">AI summaries and article translation use Gemini 2.5 Flash Lite and require a Gemini API key.
+        Enter your
         key below — it will be saved in the server's <code>.env</code> file.</p>
-      <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." autocomplete="off"
+      <input type="password" id="apiKeyInput" class="modal-input" placeholder="AIza..." autocomplete="off"
         spellcheck="false" />
       <p class="modal-error" id="apiKeyError"></p>
       <button class="modal-save-btn" id="apiKeySaveBtn" onclick="saveApiKey()">Save Key</button>
@@ -1608,7 +1610,7 @@
         uiLanguage: 'UI Language',
         translateArticles: 'Translate Articles',
         translateOff: 'Off – show original',
-        translateHint: 'Uses GPT-4o to translate titles and descriptions of loaded articles.',
+        translateHint: 'Uses Gemini 2.5 Flash Lite to translate titles and descriptions of loaded articles.',
         translatedBadge: '🌐 Translated',
         translating: 'Translating articles…',
         noArticles: 'No articles found',
@@ -1656,7 +1658,7 @@
         uiLanguage: 'שפת ממשק',
         translateArticles: 'תרגם כתבות',
         translateOff: 'כבוי – הצג מקור',
-        translateHint: 'משתמש ב-GPT-4o לתרגום כותרות ותיאורים של הכתבות.',
+        translateHint: 'משתמש ב-Gemini 2.5 Flash Lite לתרגום כותרות ותיאורים של הכתבות.',
         translatedBadge: '🌐 מתורגם',
         translating: 'מתרגם כתבות…',
         noArticles: 'לא נמצאו כתבות',
@@ -1793,7 +1795,7 @@
       try {
         const res = await fetch('/api/config-status');
         const data = await res.json();
-        if (!data.openaiKeySet) {
+        if (!data.geminiKeySet) {
           document.getElementById('apiKeyModal').style.display = 'flex';
         }
       } catch (_) { /* server unreachable — skip silently */ }
@@ -1809,8 +1811,8 @@
       const btn = document.getElementById('apiKeySaveBtn');
       errEl.textContent = '';
 
-      if (!key.startsWith('sk-')) {
-        errEl.textContent = 'Key must start with sk-';
+      if (!key.startsWith('AIza') && !key.startsWith('sk-')) {
+        errEl.textContent = 'Key must start with AIza or sk-';
         return;
       }
 
@@ -1824,7 +1826,7 @@
         });
         if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to save'); }
         closeApiKeyModal();
-        showToast('OpenAI API key saved — AI features enabled', 'success');
+        showToast('Gemini API key saved — AI features enabled', 'success');
       } catch (e) {
         errEl.textContent = e.message;
         btn.disabled = false;
